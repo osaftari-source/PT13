@@ -107,3 +107,35 @@
   .txn-actions .small-btn{width:100%}
   .txn-split-meta{display:grid;gap:4px;margin-top:7px;font-size:11px}
 }
+
+
+/* PortOS OS v13.0.5.4 — Monthly Density & Spending Analysis Layout Fix */
+.monthly-overview-grid{display:grid;gap:14px;margin-top:18px}
+.composition-visual-only{display:block}
+.expense-breakdown-card{display:grid;gap:0}
+.expense-item{padding:10px 0;border-bottom:1px solid var(--line);min-width:0}
+.expense-item:last-child{border-bottom:0}
+.expense-name{font-size:13px;font-weight:690;color:var(--ink);margin-bottom:4px}
+.expense-value{font-size:11px;color:var(--muted);line-height:1.4}
+.expense-variance{margin-top:5px;font-size:11px;font-weight:760}
+.variance.under{color:var(--green)}
+.variance.over{color:var(--red)}
+.variance.neutral{color:var(--muted)}
+.monthly-detail-grid{display:grid;gap:14px}
+@media(max-width:719px){
+  .txn{padding:8px 0}
+  .txn-top{gap:7px}
+  .txn-side{min-width:132px;gap:3px}
+  .txn-context{display:none}
+  .txn-actions{flex-direction:row;justify-content:flex-end;align-items:center;gap:4px}
+  .txn-actions .small-btn{width:auto;padding:6px 8px}
+  .txn-split-meta{gap:2px;margin-top:5px}
+  .expense-item{padding:9px 0}
+}
+@media(min-width:980px){
+  .monthly-overview-grid{grid-template-columns:minmax(480px,.95fr) minmax(420px,1.05fr);align-items:start}
+  .expense-breakdown-panel{margin-top:18px}
+  .expense-breakdown-card{grid-template-columns:repeat(3,minmax(0,1fr));column-gap:20px;padding:10px 16px}
+  .expense-item{padding:11px 0}
+  .monthly-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:14px}
+}
