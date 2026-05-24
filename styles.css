@@ -77,3 +77,33 @@
 .plan-status.pending{background:#fff0d6;color:#a56308}.plan-status.partial{background:#e9f2ff;color:#1767a6}.plan-status.done{background:#def7ed;color:#08765b}
 .subsection-label{font-size:11px;font-weight:760;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:2px 0 9px}.actual-activity{margin-top:15px}
 @media(max-width:719px){.plan-head,.plan-row{grid-template-columns:minmax(112px,1.35fr) minmax(62px,.68fr) minmax(60px,.65fr) minmax(68px,.75fr);padding:9px 8px;gap:5px;font-size:11px}.plan-status{padding:3px 6px}.plan-alert{padding:10px;font-size:11px}}
+
+
+/* PortOS OS v13.0.5.3 — Month-End Readiness & Transaction Layout Fix */
+.snapshot-readiness{margin:15px 0 0;padding:15px;border-radius:14px;border:1px solid var(--line);background:var(--soft);max-width:650px}
+.snapshot-title{font-size:15px;font-weight:760;color:var(--ink);margin-bottom:5px}
+.snapshot-text{font-size:12px;color:var(--muted);line-height:1.45;margin-bottom:13px}
+.snapshot-subtitle{font-size:11px;font-weight:760;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:10px 0 7px}
+.snapshot-check{display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.35;padding:5px 0}
+.snapshot-check span:first-child{font-size:14px;font-weight:760;line-height:1}
+.snapshot-check.done{color:var(--green)}
+.snapshot-check.pending{color:var(--muted)}
+.snapshot-actions{margin-top:13px}
+.operational-title{margin-top:18px}
+.secondary-analysis{margin-top:18px}
+.txn-top{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:14px}
+.txn-body{min-width:0}
+.txn-side{min-width:178px;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.txn-context{font-size:10.5px;color:var(--muted);font-weight:650;min-height:14px}
+.txn-actions{justify-content:flex-end;flex-wrap:nowrap}
+.txn-split-meta{display:flex;flex-wrap:wrap;column-gap:12px;row-gap:3px;margin-top:5px;font-size:11px;color:var(--muted)}
+.txn-split-meta strong{font-weight:690;color:var(--ink)}
+:root[data-theme="dark"] .snapshot-readiness{background:var(--soft);border-color:var(--line)}
+@media(max-width:719px){
+  .snapshot-readiness{padding:12px;max-width:none}
+  .txn-top{gap:8px}
+  .txn-side{min-width:108px;gap:5px}
+  .txn-actions{flex-direction:column;align-items:stretch}
+  .txn-actions .small-btn{width:100%}
+  .txn-split-meta{display:grid;gap:4px;margin-top:7px;font-size:11px}
+}
