@@ -144,7 +144,7 @@
 /* PortOS OS v13.0.5.5 — Sticky Month Navigation & Mobile Header Compactness */
 .ui-svg{width:20px;height:20px;display:block}
 .topbar-context{display:flex;align-items:center;gap:14px;min-width:0}
-.mobile-page-icon{display:none;align-items:center;justify-content:center;color:var(--blue);flex:0 0 auto}
+.mobile-page-label{display:none;align-items:center;color:var(--ink);font-size:13px;font-weight:750;letter-spacing:-.01em;flex:0 0 auto;white-space:nowrap}
 .topbar-month{display:flex;align-items:center;min-width:0}
 .topbar-month .month-switch{gap:4px}
 .topbar-month .month-pill{white-space:nowrap}
@@ -152,8 +152,7 @@
   .topbar{height:58px;padding:0 8px;gap:5px}
   .topbar-context{gap:4px;flex:1 1 auto;min-width:0}
   .topbar-title{display:none}
-  .mobile-page-icon{display:flex;width:33px;height:34px;border-radius:10px;background:var(--soft)}
-  .mobile-page-icon .ui-svg{width:19px;height:19px}
+  .mobile-page-label{display:flex;min-width:54px;height:34px;padding:0 3px}
   .topbar-month{flex:1 1 auto;justify-content:center}
   .topbar-month .month-switch{gap:2px}
   .topbar-month .icon-btn{width:27px;height:34px;border:0;background:transparent;border-radius:8px;font-size:21px}
@@ -165,4 +164,11 @@
 }
 @media(min-width:720px){
   .topbar-month .month-pill{min-width:116px;padding:9px 10px}
+}
+
+
+/* PortOS OS v13.0.5.6 — Mobile Header Text Context Refinement */
+@media(max-width:719px){
+  .topbar-context:has(.topbar-month) .mobile-page-label{min-width:48px;font-size:12px}
+  .topbar-context:has(.topbar-month) .topbar-month .month-pill{min-width:68px;padding-left:3px;padding-right:3px}
 }
