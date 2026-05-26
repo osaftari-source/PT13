@@ -1,6 +1,6 @@
 'use strict';
-/* PortOS OS v13.0.5.6.4 — App Installation & Update Management Fix; public front-end contains no private configuration values. */
-const APP_VERSION='OS v13.0.5.6.4';
+/* PortOS OS v13.0.5.6.5 — Recent Transaction Full Amount Format Fix; public front-end contains no private configuration values. */
+const APP_VERSION='OS v13.0.5.6.5';
 const K={endpoint:'pt13_endpoint',token:'pt13_token',cache:'pt13_cache',pin:'pt13_pin_hash',salt:'pt13_pin_salt',mask:'pt13_values_masked',unlocked:'pt13_unlocked_until',away:'pt13_away_at',theme:'pt13_theme'};
 const SESSION_MS=5*60*1000, AWAY_MS=60*1000;
 const PAGES=[['dashboard','⌂','Dashboard'],['monthly','▣','Monthly'],['portfolio','◔','Portfolio'],['settings','⚙','Settings']];
@@ -25,7 +25,7 @@ const esc=v=>String(v??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&
 const key=v=>String(v??'').trim().toLowerCase(), n=v=>Number(String(v??'').replace(/,/g,''))||0;
 const yyyyMm=d=>new Date(d).toISOString().slice(0,7), today=()=>new Date().toISOString().slice(0,10), thisMonth=()=>today().slice(0,7);
 const monthLabel=m=>m==='OPENING'?'Starting baseline':new Date(`${m}-01T00:00:00`).toLocaleDateString('en-GB',{month:'short',year:'numeric'});
-const money=v=>S.masked?'Rp ••••••':new Intl.NumberFormat('en-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(n(v));
+const money=v=>S.masked?'Rp ••••••':`Rp ${Math.round(n(v)).toLocaleString('en-US')}`;
 const compact=v=>{if(S.masked)return 'Rp ••••••';const x=n(v),a=Math.abs(x),unit=a<1000000?'K':a<1000000000?'M':'B',div=unit==='K'?1000:unit==='M'?1000000:1000000000;return `Rp ${(x/div).toFixed(2)}${unit}`};
 const compactAxis=v=>S.masked?'••':compact(v).replace(/^Rp\s*/,'');
 const pct=v=>S.masked?'••••••':`${n(v)>=0?'+':''}${n(v).toFixed(2)}%`;
@@ -55,7 +55,7 @@ function announcePortosUpdate(worker){
 async function registerPortosServiceWorker(){
   if(!('serviceWorker' in navigator)){setUpdateStatus('Update checking is not supported in this browser.',{available:false});return null}
   try{
-    portosRegistration=await navigator.serviceWorker.register('./service-worker.js?v=13.0.5.6.4',{updateViaCache:'none'});
+    portosRegistration=await navigator.serviceWorker.register('./service-worker.js?v=13.0.5.6.5',{updateViaCache:'none'});
     if(portosRegistration.waiting&&navigator.serviceWorker.controller)announcePortosUpdate(portosRegistration.waiting);
     portosRegistration.addEventListener('updatefound',()=>{
       const candidate=portosRegistration.installing;if(!candidate)return;
