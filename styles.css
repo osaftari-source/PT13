@@ -287,3 +287,15 @@
 :root[data-theme="dark"] .modal-actions{
   border-color:var(--line);
 }
+
+
+/* PortOS OS v13.0.5.6.4 — App Installation & Update Management Fix */
+.update-management-card .card-head{margin-bottom:10px}
+.update-status{margin:12px 0 2px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--soft);color:var(--muted);font-size:12px;font-weight:680}
+.update-status.available{background:var(--orange-bg);border-color:#f0d093;color:var(--orange)}
+.update-status.checking{color:var(--blue)}
+.update-now{background:var(--orange)!important;color:#fff!important;border-color:var(--orange)!important}
+.update-note{margin-top:11px;line-height:1.45}
+.small-btn.hidden{display:none}
+:root[data-theme="dark"] .update-status{background:var(--soft);border-color:var(--line);color:var(--muted)}
+:root[data-theme="dark"] .update-status.available{background:var(--orange-bg);color:var(--orange);border-color:#594322}
