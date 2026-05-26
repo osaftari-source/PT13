@@ -1,6 +1,6 @@
 'use strict';
-/* PortOS OS v13.0.5.6.2 — Recent Transaction Note Display Fix; public front-end contains no private configuration values. */
-const APP_VERSION='OS v13.0.5.6.2';
+/* PortOS OS v13.0.5.6.3 — Compact Number Format Fix; public front-end contains no private configuration values. */
+const APP_VERSION='OS v13.0.5.6.3';
 const K={endpoint:'pt13_endpoint',token:'pt13_token',cache:'pt13_cache',pin:'pt13_pin_hash',salt:'pt13_pin_salt',mask:'pt13_values_masked',unlocked:'pt13_unlocked_until',away:'pt13_away_at',theme:'pt13_theme'};
 const SESSION_MS=5*60*1000, AWAY_MS=60*1000;
 const PAGES=[['dashboard','⌂','Dashboard'],['monthly','▣','Monthly'],['portfolio','◔','Portfolio'],['settings','⚙','Settings']];
@@ -25,7 +25,7 @@ const key=v=>String(v??'').trim().toLowerCase(), n=v=>Number(String(v??'').repla
 const yyyyMm=d=>new Date(d).toISOString().slice(0,7), today=()=>new Date().toISOString().slice(0,10), thisMonth=()=>today().slice(0,7);
 const monthLabel=m=>m==='OPENING'?'Starting baseline':new Date(`${m}-01T00:00:00`).toLocaleDateString('en-GB',{month:'short',year:'numeric'});
 const money=v=>S.masked?'Rp ••••••':new Intl.NumberFormat('en-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(n(v));
-const compact=v=>{if(S.masked)return 'Rp ••••••';const x=n(v),a=Math.abs(x),unit=a<1000000?'K':a<1000000000?'M':'B',div=unit==='K'?1000:unit==='M'?1000000:1000000000;return `Rp ${new Intl.NumberFormat('en-ID',{minimumFractionDigits:2,maximumFractionDigits:2}).format(x/div)}${unit}`};
+const compact=v=>{if(S.masked)return 'Rp ••••••';const x=n(v),a=Math.abs(x),unit=a<1000000?'K':a<1000000000?'M':'B',div=unit==='K'?1000:unit==='M'?1000000:1000000000;return `Rp ${(x/div).toFixed(2)}${unit}`};
 const compactAxis=v=>S.masked?'••':compact(v).replace(/^Rp\s*/,'');
 const pct=v=>S.masked?'••••••':`${n(v)>=0?'+':''}${n(v).toFixed(2)}%`;
 const mult=v=>S.masked?'••••••':`${n(v).toFixed(1)}×`;
