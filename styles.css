@@ -172,3 +172,118 @@
   .topbar-context:has(.topbar-month) .mobile-page-label{min-width:48px;font-size:12px}
   .topbar-context:has(.topbar-month) .topbar-month .month-pill{min-width:68px;padding-left:3px;padding-right:3px}
 }
+
+
+/* PortOS OS v13.0.5.6.1 — Dark Mode Contrast & Semantic Colour Hotfix
+   Narrow patch only: preserve the v13.0.5.6 layout, data logic and workflow. */
+
+/* Restore financial meaning after the existing dark rule normalises metric values to white. */
+:root[data-theme="dark"] .metric-value.pos,
+:root[data-theme="dark"] .row-val.pos,
+:root[data-theme="dark"] .txn-type.pos,
+:root[data-theme="dark"] .txn-amount.pos,
+:root[data-theme="dark"] .controlled-top .pos,
+:root[data-theme="dark"] .deviation.pos{
+  color:var(--green)!important;
+}
+:root[data-theme="dark"] .metric-value.neg,
+:root[data-theme="dark"] .row-val.neg,
+:root[data-theme="dark"] .txn-type.neg,
+:root[data-theme="dark"] .txn-amount.neg,
+:root[data-theme="dark"] .controlled-top .neg,
+:root[data-theme="dark"] .deviation.neg{
+  color:var(--red)!important;
+}
+:root[data-theme="dark"] .metric-value.blue,
+:root[data-theme="dark"] .txn-type.blue,
+:root[data-theme="dark"] .txn-amount.blue,
+:root[data-theme="dark"] .holding-est{
+  color:var(--blue)!important;
+}
+:root[data-theme="dark"] .warn-val{
+  color:var(--orange)!important;
+}
+:root[data-theme="dark"] .badge.ok{background:var(--green-bg);color:var(--green)}
+:root[data-theme="dark"] .badge.bad{background:var(--red-bg);color:var(--red)}
+:root[data-theme="dark"] .badge.warn{background:var(--orange-bg);color:var(--orange)}
+:root[data-theme="dark"] .bar-fill.ok{background:var(--green)}
+:root[data-theme="dark"] .bar-fill.warn{background:var(--gold)}
+:root[data-theme="dark"] .bar-fill.bad{background:var(--red)}
+
+/* Correct the shared modal surface. v13.0.5.6 styled `.modal-card`,
+   while operational dialogs are rendered with the `.modal` class. */
+:root[data-theme="dark"] .modal-backdrop{
+  background:rgba(2,8,14,.72);
+}
+:root[data-theme="dark"] .modal{
+  background:var(--card);
+  color:var(--ink);
+  border:1px solid var(--line);
+  box-shadow:0 26px 62px rgba(0,0,0,.50);
+}
+:root[data-theme="dark"] .modal h2,
+:root[data-theme="dark"] .modal h3,
+:root[data-theme="dark"] .modal strong{
+  color:var(--ink);
+}
+:root[data-theme="dark"] .modal .hint,
+:root[data-theme="dark"] .modal .metric-sub{
+  color:var(--muted);
+}
+:root[data-theme="dark"] .modal .field label{
+  color:#c4d5e3;
+}
+:root[data-theme="dark"] .modal .field input,
+:root[data-theme="dark"] .modal .field select,
+:root[data-theme="dark"] .modal .field textarea{
+  background:#142b3e;
+  border-color:#28455a;
+  color:var(--ink);
+  opacity:1;
+}
+:root[data-theme="dark"] .modal .field input::placeholder,
+:root[data-theme="dark"] .modal .field textarea::placeholder{
+  color:#829aab;
+  opacity:1;
+}
+:root[data-theme="dark"] .modal .field input:disabled,
+:root[data-theme="dark"] .modal .field select:disabled,
+:root[data-theme="dark"] .modal .field textarea:disabled,
+:root[data-theme="dark"] .modal .field input[readonly]{
+  background:#1b3346;
+  border-color:#2f4c60;
+  color:#d9e6f0;
+  -webkit-text-fill-color:#d9e6f0;
+  opacity:1;
+}
+:root[data-theme="dark"] .modal .field input:focus,
+:root[data-theme="dark"] .modal .field select:focus,
+:root[data-theme="dark"] .modal .field textarea:focus{
+  outline:2px solid rgba(57,168,240,.33);
+  border-color:var(--blue);
+}
+:root[data-theme="dark"] .modal .btn-secondary{
+  background:#152c3f;
+  color:var(--ink);
+  border:1px solid #29465b;
+}
+:root[data-theme="dark"] .modal .btn-secondary:hover{
+  background:#1b364b;
+}
+:root[data-theme="dark"] .modal .btn-ghost{
+  background:#14283a;
+  color:#74c1f4;
+  border:1px solid #29465b;
+}
+:root[data-theme="dark"] .modal .btn-primary{
+  background:var(--blue);
+  color:#fff;
+}
+:root[data-theme="dark"] .modal .btn-danger{
+  background:var(--red-bg);
+  color:var(--red);
+  border:1px solid #56313a;
+}
+:root[data-theme="dark"] .modal-actions{
+  border-color:var(--line);
+}
