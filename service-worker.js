@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.6.8 Portfolio KPI & Navigation Visual Refinement */
-const CACHE = 'portos-os-v13-0-5-6-8';
+/* PortOS Service Worker — OS v13.0.5.6.9 Mobile Month-Header Typography Fix */
+const CACHE = 'portos-os-v13-0-5-6-9';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.6.8',
-  './app.js?v=13.0.5.6.8',
-  './manifest.json?v=13.0.5.6.8',
+  './styles.css?v=13.0.5.6.9',
+  './app.js?v=13.0.5.6.9',
+  './manifest.json?v=13.0.5.6.9',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
