@@ -299,3 +299,18 @@
 .small-btn.hidden{display:none}
 :root[data-theme="dark"] .update-status{background:var(--soft);border-color:var(--line);color:var(--muted)}
 :root[data-theme="dark"] .update-status.available{background:var(--orange-bg);color:var(--orange);border-color:#594322}
+
+
+/* PortOS OS v13.0.5.6.8 — Portfolio KPI & Navigation Visual Refinement */
+.nav-icon{display:grid;place-items:center}
+.nav-icon .ui-svg{width:21px;height:21px}
+.topbar-title h1{font-size:21px;font-weight:780;letter-spacing:-.025em}
+@media(max-width:719px){
+  .mobile-page-label{
+    min-width:74px;
+    font-size:18px;
+    font-weight:790;
+    letter-spacing:-.025em;
+  }
+  .mobile-nav .nav-icon .ui-svg{width:22px;height:22px}
+}

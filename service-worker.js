@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.6.7 Dashboard KPI Alignment Refinement */
-const CACHE = 'portos-os-v13-0-5-6-7';
+/* PortOS Service Worker — OS v13.0.5.6.8 Portfolio KPI & Navigation Visual Refinement */
+const CACHE = 'portos-os-v13-0-5-6-8';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.6.7',
-  './app.js?v=13.0.5.6.7',
-  './manifest.json?v=13.0.5.6.7',
+  './styles.css?v=13.0.5.6.8',
+  './app.js?v=13.0.5.6.8',
+  './manifest.json?v=13.0.5.6.8',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
