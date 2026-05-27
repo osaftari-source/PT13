@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.6.5 Recent Transaction Full Amount Format Fix */
-const CACHE = 'portos-os-v13-0-5-6-5';
+/* PortOS Service Worker — OS v13.0.5.6.6 Growth Metric Placement & Updated YTD Growth Fix */
+const CACHE = 'portos-os-v13-0-5-6-6';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.6.5',
-  './app.js?v=13.0.5.6.5',
-  './manifest.json?v=13.0.5.6.5',
+  './styles.css?v=13.0.5.6.6',
+  './app.js?v=13.0.5.6.6',
+  './manifest.json?v=13.0.5.6.6',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
