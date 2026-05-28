@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.6.9 Mobile Month-Header Typography Fix */
-const CACHE = 'portos-os-v13-0-5-6-9';
+/* PortOS Service Worker — OS v13.0.5.6.10 Smart Account Defaults Fix */
+const CACHE = 'portos-os-v13-0-5-6-10';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.6.9',
-  './app.js?v=13.0.5.6.9',
-  './manifest.json?v=13.0.5.6.9',
+  './styles.css?v=13.0.5.6.10',
+  './app.js?v=13.0.5.6.10',
+  './manifest.json?v=13.0.5.6.10',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
