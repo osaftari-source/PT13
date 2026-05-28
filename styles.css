@@ -426,3 +426,19 @@
   .report-kpi-value{font-size:16px}
   .report-footer{page-break-inside:avoid}
 }
+
+/* PortOS OS v13.0.5.6.12 — Expense Drill-Down Report Refinement */
+.report-drilldown{margin:10px 0 15px;padding:12px;border-radius:13px;background:var(--soft);border:1px solid var(--line)}
+.report-drilldown-head{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:9px}
+.report-drilldown-head h4{font-size:13px;margin:0;color:var(--ink)}
+.report-drilldown-head span{font-size:11px;font-weight:760}
+.report-highlight-card{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;border:1px solid #cedff0;background:#e7f1ff;color:var(--blue);border-radius:11px;padding:10px 11px;font-size:12px}
+.report-highlight-card strong{font-size:12px}
+.report-highlight-card span{font-size:16px;font-weight:790;letter-spacing:-.02em}
+.report-highlight-card small{color:var(--muted)}
+:root[data-theme="dark"] .report-drilldown{background:var(--soft);border-color:var(--line)}
+:root[data-theme="dark"] .report-highlight-card{background:#102e48;border-color:#214767}
+@media print{
+  .report-drilldown{break-inside:avoid;background:#fff;border-color:#dce5ee}
+  .report-highlight-card{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}

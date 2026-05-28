@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.6.11 Monthly Report Generation */
-const CACHE = 'portos-os-v13-0-5-6-11';
+/* PortOS Service Worker — OS v13.0.5.6.12 Expense Drill-Down Report Refinement */
+const CACHE = 'portos-os-v13-0-5-6-12';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.6.11',
-  './app.js?v=13.0.5.6.11',
-  './manifest.json?v=13.0.5.6.11',
+  './styles.css?v=13.0.5.6.12',
+  './app.js?v=13.0.5.6.12',
+  './manifest.json?v=13.0.5.6.12',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',

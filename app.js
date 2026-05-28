@@ -1,6 +1,6 @@
 'use strict';
-/* PortOS OS v13.0.5.6.11 — Monthly Report Generation; public front-end contains no private configuration values. */
-const APP_VERSION='OS v13.0.5.6.11';
+/* PortOS OS v13.0.5.6.12 — Expense Drill-Down Report Refinement; public front-end contains no private configuration values. */
+const APP_VERSION='OS v13.0.5.6.12';
 const K={endpoint:'pt13_endpoint',token:'pt13_token',cache:'pt13_cache',pin:'pt13_pin_hash',salt:'pt13_pin_salt',mask:'pt13_values_masked',unlocked:'pt13_unlocked_until',away:'pt13_away_at',theme:'pt13_theme'};
 const SESSION_MS=5*60*1000, AWAY_MS=60*1000;
 const PAGES=[['dashboard','dashboard','Dashboard'],['monthly','monthly','Monthly'],['portfolio','portfolio','Portfolio'],['settings','settings','Settings']];
@@ -55,7 +55,7 @@ function announcePortosUpdate(worker){
 async function registerPortosServiceWorker(){
   if(!('serviceWorker' in navigator)){setUpdateStatus('Update checking is not supported in this browser.',{available:false});return null}
   try{
-    portosRegistration=await navigator.serviceWorker.register('./service-worker.js?v=13.0.5.6.11',{updateViaCache:'none'});
+    portosRegistration=await navigator.serviceWorker.register('./service-worker.js?v=13.0.5.6.12',{updateViaCache:'none'});
     if(portosRegistration.waiting&&navigator.serviceWorker.controller)announcePortosUpdate(portosRegistration.waiting);
     portosRegistration.addEventListener('updatefound',()=>{
       const candidate=portosRegistration.installing;if(!candidate)return;
@@ -318,7 +318,14 @@ function reportExpenseData(month){
   rows.forEach(t=>{const note=String(t.note||'').trim(),amt=personalExpense(t);if(!note||/lupa|unknown|tidak tahu|n\/a|^-$|^\?$/.test(key(note)))unclear.push(note||'Blank note');if(note){const k=key(note);notes[k]=notes[k]||{label:note,count:0,amount:0};notes[k].count++;notes[k].amount+=amt}});
   const repeats=Object.values(notes).filter(x=>x.count>1).sort((a,b)=>b.amount-a.amount).slice(0,4);
   const major=rows.map(t=>({category:displayCat(t.category_id),note:String(t.note||'No description').trim()||'No description',amount:personalExpense(t)})).sort((a,b)=>b.amount-a.amount).slice(0,5);
-  return{rows,regular,incidental,incidentalItems,regularActual,regularBudget,total,repeats,major,unclear};
+  const transactionsForCategory=id=>rows.filter(t=>key(t.category_id)===key(id));
+  const groupedItemsFor=id=>{const grouped={};transactionsForCategory(id).forEach(t=>{const note=String(t.note||'No description').trim()||'No description',k=key(note);grouped[k]=grouped[k]||{label:note,amount:0,count:0};grouped[k].amount+=personalExpense(t);grouped[k].count++});return Object.values(grouped).sort((a,b)=>b.amount-a.amount)};
+  const categoryByName=name=>regular.find(r=>key(r.id)===key(name)||key(r.label)===key(name));
+  const installment=categoryByName('installment'),rizka=categoryByName('rizka'),overBudget=regular.filter(r=>r.actual>r.budget&&r.actual>0);
+  const drilldowns=[],included=new Set();
+  const addDrilldown=(row,mode)=>{if(!row||included.has(key(row.id)))return;const items=groupedItemsFor(row.id),ccItems=mode==='installment'?items.filter(x=>/(^|\b)(cc|credit card|kartu kredit)(\b|$)/i.test(x.label)):[],relatedIncidental=mode==='rizka'?incidentalItems.filter(x=>key(x.label).includes('rizka')):[];drilldowns.push({...row,mode,items,ccItems,ccTotal:ccItems.reduce((s,x)=>s+x.amount,0),relatedIncidental,relatedIncidentalTotal:relatedIncidental.reduce((s,x)=>s+x.amount,0)});included.add(key(row.id))};
+  addDrilldown(installment,'installment');addDrilldown(rizka,'rizka');overBudget.forEach(r=>addDrilldown(r,'over_budget'));
+  return{rows,regular,incidental,incidentalItems,regularActual,regularBudget,total,repeats,major,unclear,overBudget,drilldowns};
 }
 function reportCashRows(month){
   const previous=beforeMonth(month),openBalances=balancesForMonth(previous),allTx=S.data?.transactions||[];
@@ -400,13 +407,25 @@ function reportExpenseNarrative(e){
   if(e.unclear.length)text+=` ${e.unclear.length} item(s) have blank or unclear descriptions and may reduce analysis quality.`;
   return text;
 }
+function reportExpenseDrilldownHtml(item){
+  const itemRows=item.items.map(x=>`<tr><td>${esc(x.label)}${x.count>1?`<small>${x.count} recorded entries</small>`:''}</td><td class="num">${reportMoney(x.amount)}</td><td class="num">${item.actual?`${(x.amount/item.actual*100).toFixed(1)}%`:'—'}</td></tr>`);
+  itemRows.push(`<tr class="total"><td>Total ${esc(item.label)}</td><td class="num">${reportMoney(item.actual)}</td><td class="num">100.0%</td></tr>`);
+  const status=item.actual>item.budget?`Over budget by ${reportMoney(item.actual-item.budget)}`:`Below budget by ${reportMoney(item.budget-item.actual)}`;
+  const title=item.mode==='installment'?'Installment Analysis':item.mode==='rizka'?'Rizka Analysis':`${item.label} — Over-Budget Analysis`;
+  let extra='';
+  if(item.mode==='installment')extra=`<div class="report-highlight-card"><strong>Credit Card Expense Subtotal</strong><span>${reportMoney(item.ccTotal)}</span><small>${item.ccItems.length?item.ccItems.map(x=>esc(x.label)).join(' + '):'No credit-card note identified for this month.'}</small></div>`;
+  if(item.mode==='rizka'&&item.relatedIncidentalTotal>0)extra=`<div class="report-note">Additional Rizka-related incidental spending recorded separately: <strong>${reportMoney(item.relatedIncidentalTotal)}</strong> (${item.relatedIncidental.map(x=>esc(x.label)).join(', ')}). This amount remains excluded from regular Rizka budget performance.</div>`;
+  return `<div class="report-drilldown"><div class="report-drilldown-head"><h4>${esc(title)}</h4><span class="${item.actual>item.budget?'neg':'pos'}">${esc(status)}</span></div>${reportTable(['Detail / Note','Amount','Share'],itemRows)}${extra}</div>`;
+}
 function reportExpenseHtml(d){
   const e=d.expense,regular=e.regular.map(r=>`<tr><td>${esc(r.label)}</td><td class="num">${reportMoney(r.budget)}</td><td class="num">${reportMoney(r.actual)}</td><td class="num ${r.variance>=0?'pos':'neg'}">${r.variance>=0?`${reportMoney(r.variance)} under`:`${reportMoney(Math.abs(r.variance))} over`}</td></tr>`);
   regular.push(`<tr class="total"><td>Regular Total</td><td class="num">${reportMoney(e.regularBudget)}</td><td class="num">${reportMoney(e.regularActual)}</td><td class="num">${reportSigned(e.regularBudget-e.regularActual)}</td></tr>`);
   const incidental=e.incidentalItems.map(x=>`<tr><td>${esc(x.label)}</td><td class="num">${reportMoney(x.amount)}</td><td class="num">${e.incidental?`${(x.amount/e.incidental*100).toFixed(1)}%`:'—'}</td></tr>`);
   if(incidental.length)incidental.push(`<tr class="total"><td>Total Incidental</td><td class="num">${reportMoney(e.incidental)}</td><td class="num">100.0%</td></tr>`);
   const major=e.major.map(x=>`<li><strong>${esc(x.category)}</strong> — ${esc(x.note)}: ${reportMoney(x.amount)}</li>`).join('');
-  return `<section class="report-section"><h2>Expense Analysis</h2><div class="report-mini-grid">${reportKpi('Total Expenses',reportMoney(e.total),'Regular + incidental','neg')}${reportKpi('Regular Expenses',reportMoney(e.regularActual),`Budget: ${reportMoney(e.regularBudget)}`)}${reportKpi('Incidental Expenses',reportMoney(e.incidental),'Actual-only exceptional spending','blue')}${reportKpi('Regular Budget Variance',reportMoney(Math.abs(e.regularBudget-e.regularActual)),e.regularBudget>=e.regularActual?'Below budget':'Above budget',e.regularBudget>=e.regularActual?'pos':'neg')}</div><h3>Regular Budget Performance</h3>${reportTable(['Expense Category','Budget','Actual','Variance'],regular)}<h3>Incidental Expenses</h3>${incidental.length?reportTable(['Incidental Item / Note','Amount','Share'],incidental):'<p class="report-caption">No incidental expenses recorded.</p>'}<div class="report-insight"><strong>Note-Based Spending Insight</strong><p>${esc(reportExpenseNarrative(e))}</p>${major?`<ul>${major}</ul>`:''}</div></section>`;
+  const overBudget=e.overBudget.map(r=>`<tr><td>${esc(r.label)}</td><td class="num">${reportMoney(r.budget)}</td><td class="num">${reportMoney(r.actual)}</td><td class="num neg">${reportMoney(r.actual-r.budget)}</td></tr>`);
+  const drilldowns=e.drilldowns.map(reportExpenseDrilldownHtml).join('');
+  return `<section class="report-section"><h2>Expense Analysis</h2><div class="report-mini-grid">${reportKpi('Total Expenses',reportMoney(e.total),'Regular + incidental','neg')}${reportKpi('Regular Expenses',reportMoney(e.regularActual),`Budget: ${reportMoney(e.regularBudget)}`)}${reportKpi('Incidental Expenses',reportMoney(e.incidental),'Actual-only exceptional spending','blue')}${reportKpi('Regular Budget Variance',reportMoney(Math.abs(e.regularBudget-e.regularActual)),e.regularBudget>=e.regularActual?'Below budget':'Above budget',e.regularBudget>=e.regularActual?'pos':'neg')}</div><h3>Regular Budget Performance</h3>${reportTable(['Expense Category','Budget','Actual','Variance'],regular)}${overBudget.length?`<h3>Over-Budget Categories</h3>${reportTable(['Category','Budget','Actual','Over Budget'],overBudget)}`:''}<h3>Selected Category Deep Dives</h3>${drilldowns||'<p class="report-caption">No targeted or over-budget regular expense categories recorded for this month.</p>'}<h3>Incidental Expenses</h3>${incidental.length?reportTable(['Incidental Item / Note','Amount','Share'],incidental):'<p class="report-caption">No incidental expenses recorded.</p>'}<div class="report-insight"><strong>Note-Based Spending Insight</strong><p>${esc(reportExpenseNarrative(e))}</p>${major?`<ul>${major}</ul>`:''}</div></section>`;
 }
 function reportCashHtml(d){
   const rows=d.cash.map(r=>`<tr><td>${esc(r.label)}<small>${esc(r.status)}</small></td><td class="num">${reportMoney(r.opening)}</td><td class="num pos">${reportMoney(r.income+r.settlementIn+r.reimbursementIn+r.transferIn)}</td><td class="num neg">${reportMoney(r.expense+r.investment+r.receivableOut+r.transferOut)}</td><td class="num">${reportMoney(r.ending)}</td><td>${esc(r.status)}</td></tr>`);
