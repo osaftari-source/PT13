@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.6.13 Monthly Report Accuracy Refinement */
-const CACHE = 'portos-os-v13-0-5-6-13';
+/* PortOS Service Worker — OS v13.0.5.6.14 SBN Coupon Attribution Fix */
+const CACHE = 'portos-os-v13-0-5-6-14';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.6.13',
-  './app.js?v=13.0.5.6.13',
-  './manifest.json?v=13.0.5.6.13',
+  './styles.css?v=13.0.5.6.14',
+  './app.js?v=13.0.5.6.14',
+  './manifest.json?v=13.0.5.6.14',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
