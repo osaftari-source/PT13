@@ -1,6 +1,6 @@
 'use strict';
-/* PortOS OS v13.0.5.6.15 — Context-Sensitive Recent Transaction Filters; public front-end contains no private configuration values. */
-const APP_VERSION='OS v13.0.5.6.15';
+/* PortOS OS v13.0.5.6.16 — Other Income Drill-Down Report Refinement; public front-end contains no private configuration values. */
+const APP_VERSION='OS v13.0.5.6.16';
 const K={endpoint:'pt13_endpoint',token:'pt13_token',cache:'pt13_cache',pin:'pt13_pin_hash',salt:'pt13_pin_salt',mask:'pt13_values_masked',unlocked:'pt13_unlocked_until',away:'pt13_away_at',theme:'pt13_theme'};
 const SESSION_MS=5*60*1000, AWAY_MS=60*1000;
 const PAGES=[['dashboard','dashboard','Dashboard'],['monthly','monthly','Monthly'],['portfolio','portfolio','Portfolio'],['settings','settings','Settings']];
@@ -55,7 +55,7 @@ function announcePortosUpdate(worker){
 async function registerPortosServiceWorker(){
   if(!('serviceWorker' in navigator)){setUpdateStatus('Update checking is not supported in this browser.',{available:false});return null}
   try{
-    portosRegistration=await navigator.serviceWorker.register('./service-worker.js?v=13.0.5.6.15',{updateViaCache:'none'});
+    portosRegistration=await navigator.serviceWorker.register('./service-worker.js?v=13.0.5.6.16',{updateViaCache:'none'});
     if(portosRegistration.waiting&&navigator.serviceWorker.controller)announcePortosUpdate(portosRegistration.waiting);
     portosRegistration.addEventListener('updatefound',()=>{
       const candidate=portosRegistration.installing;if(!candidate)return;
@@ -410,10 +410,27 @@ function reportTable(headers,rows,classes=''){return `<div class="report-table-w
 function reportSummaryHtml(d){
   return `<section class="report-section"><h2>Executive Summary</h2><div class="report-kpi-grid">${reportKpi(d.basis.portfolioLabel,reportMoney(d.ending),d.basis.type==='interim'?'Updated Forecast basis':d.basis.type==='final'?'Confirmed closing snapshot':'Available month-end basis')}${reportKpi(d.basis.growthLabel,reportMoney(d.growth),reportPct(d.growthPct),d.growth>=0?'pos':'neg')}${reportKpi('Total Income',reportMoney(d.actualIncome),d.basis.type==='interim'?'Actual recorded to date':'Actual recorded')}${reportKpi('Total Expenses',reportMoney(d.expense.total),d.basis.type==='interim'?'Actual recorded to date':'Actual recorded','neg')}${reportKpi('Net Cash Flow',reportMoney(d.actualNet),'Income − expenses − contribution',d.actualNet>=0?'pos':'neg')}${reportKpi('Investment Contribution',reportMoney(d.actualInvestment),'New money invested','blue')}${reportKpi(d.basis.returnLabel,reportMoney(d.bridgeReturn.totalReturn),d.basis.type==='interim'?'Updated Forecast cash income + valuation change':'Cash income + valuation change',d.bridgeReturn.totalReturn>=0?'pos':'neg')}${reportKpi('Outstanding Receivables',reportMoney(d.receivables.closing),`${d.receivables.openCount} open item(s)`)}</div></section>`;
 }
+function reportOtherIncomeDrilldown(d){
+  const otherRows=d.incomeRows.filter(r=>r.actual>0&&(key(r.id).includes('other')||key(r.label).includes('other income')));
+  if(!otherRows.length)return'';
+  const otherIds=new Set(otherRows.map(r=>key(r.id))),items={};
+  transactions(d.month).filter(t=>key(t.transaction_type)==='income'&&otherIds.has(key(t.category_id))).forEach(t=>{
+    const note=String(t.note||'Unspecified other income').trim()||'Unspecified other income',k=key(note);
+    items[k]=items[k]||{label:note,amount:0,count:0};items[k].amount+=n(t.amount);items[k].count++;
+  });
+  const grouped=Object.values(items).sort((a,b)=>b.amount-a.amount),total=grouped.reduce((s,x)=>s+x.amount,0);
+  if(!total)return'';
+  const rows=grouped.map(x=>`<tr><td>${esc(x.label)}${x.count>1?`<small>${x.count} recorded entries</small>`:''}</td><td class="num">${reportMoney(x.amount)}</td><td class="num">${(x.amount/total*100).toFixed(1)}%</td></tr>`);
+  rows.push(`<tr class="total"><td>Total Other Income</td><td class="num">${reportMoney(total)}</td><td class="num">100.0%</td></tr>`);
+  const top=grouped.slice(0,2).map(x=>`${x.label} (${reportMoney(x.amount)})`).join(' and ');
+  const planned=otherRows.reduce((s,r)=>s+r.planned,0),variance=total-planned;
+  const narrative=`Other Income contributed ${reportMoney(total)} during the reporting period${variance!==0?`, creating ${variance>=0?'a positive':'a negative'} variance of ${reportMoney(Math.abs(variance))} versus plan`:''}${top?`. The main driver${grouped.length>1?'s were':' was'} ${top}`:''}. Treat these items as note-based explanations of income variance, not recurring income unless they are expected to repeat.`;
+  return `<h3>Other Income Breakdown</h3>${reportTable(['Other Income Detail / Note','Amount','Share'],rows)}<div class="report-insight"><strong>Income Driver Insight</strong><p>${esc(narrative)}</p></div>`;
+}
 function reportIncomeHtml(d){
   const rows=d.incomeRows.map(r=>`<tr><td>${esc(r.label)}</td><td class="num">${reportMoney(r.planned)}</td><td class="num">${reportMoney(r.actual)}</td><td class="num ${r.variance>=0?'pos':'neg'}">${reportSigned(r.variance)}</td></tr>`);
   rows.push(`<tr class="total"><td>Total Income</td><td class="num">${reportMoney(d.incomeRows.reduce((s,r)=>s+r.planned,0))}</td><td class="num">${reportMoney(d.actualIncome)}</td><td class="num">${reportSigned(d.actualIncome-d.incomeRows.reduce((s,r)=>s+r.planned,0))}</td></tr>`);
-  return `<section class="report-section"><h2>Income Analysis</h2><p class="report-caption">Planned versus actual genuine income. Internal transfers and investment valuation changes are not classified as income.</p>${reportTable(['Income Category','Planned','Actual','Variance'],rows)}</section>`;
+  return `<section class="report-section"><h2>Income Analysis</h2><p class="report-caption">Planned versus actual genuine income. Internal transfers and investment valuation changes are not classified as income.</p>${reportTable(['Income Category','Planned','Actual','Variance'],rows)}${reportOtherIncomeDrilldown(d)}</section>`;
 }
 function reportExpenseNarrative(e){
   const dominant=e.incidentalItems[0],variance=e.regularBudget-e.regularActual,repeat=e.repeats[0];
