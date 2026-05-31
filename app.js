@@ -1,6 +1,6 @@
 'use strict';
-/* PortOS OS v13.0.5.6.19 — Actual BNI Quick Sum Basis Fix; public front-end contains no private configuration values. */
-const APP_VERSION='OS v13.0.5.6.19';
+/* PortOS OS v13.0.5.6.20 — BNI Quick Sum Scope Correction; public front-end contains no private configuration values. */
+const APP_VERSION='OS v13.0.5.6.20';
 const K={endpoint:'pt13_endpoint',token:'pt13_token',cache:'pt13_cache',pin:'pt13_pin_hash',salt:'pt13_pin_salt',mask:'pt13_values_masked',unlocked:'pt13_unlocked_until',away:'pt13_away_at',theme:'pt13_theme'};
 const SESSION_MS=5*60*1000, AWAY_MS=60*1000;
 const PAGES=[['dashboard','dashboard','Dashboard'],['monthly','monthly','Monthly'],['portfolio','portfolio','Portfolio'],['settings','settings','Settings']];
@@ -206,7 +206,50 @@ function groupLabelFor(id){if(id==='__receivables__')return 'Receivables';const 
 function forecastValue(month,series='current'){const f=forecastSeries();if(month<=f.start)return snapshotTotal(month);const row=f[series].find(x=>x.month===month);return row?row.value:totalForMonth(month)}
 function displayTotalForMonth(month){return month>latestClosed()?forecastValue(month,'current'):snapshotTotal(month)}
 function projectedHoldingRows(month){const rows=estimateHoldingRows(month).map(r=>({...r}));if(month<=latestClosed())return rows;const delta=forecastValue(month,'current')-rows.reduce((s,r)=>s+n(r.amount),0);if(Math.abs(delta)>0.5){const cash=rows.find(r=>{const a=maps().accounts[key(r.instrument_id)];return a&&bool(a.include_in_liquid_cash)&&bool(a.include_in_quick_sum)})||rows.find(r=>{const a=maps().accounts[key(r.instrument_id)];return a&&bool(a.include_in_liquid_cash)});if(cash){cash.amount=n(cash.amount)+delta;cash.value_basis='updated_forecast_cash_adjustment'}else rows.push({instrument_id:'__forecast_adjustment__',amount:delta,value_basis:'updated_forecast_cash_adjustment'});}return rows}
-function actualQuickSumRows(month){const m=maps(),snapMonths=closedMonths().filter(x=>x<=month),anchor=snapMonths.at(-1)||'OPENING',baseRows=rowsAt(anchor).filter(r=>key(r.instrument_id)!=='__receivables__'),baseBy=Object.fromEntries(baseRows.map(r=>[key(r.instrument_id),r]));const ids=[...new Set([...Object.values(m.accounts).filter(a=>bool(a.include_in_quick_sum)).map(a=>key(a.account_id)),...Object.values(m.instruments).filter(i=>bool(i.include_in_quick_sum)).map(i=>key(i.instrument_id)),...baseRows.map(r=>key(r.instrument_id))])].filter(Boolean);const liquid=balancesForMonth(month);return ids.map(id=>{const acc=m.accounts[id],inst=m.instruments[id],base=baseBy[id],isQuick=(acc&&bool(acc.include_in_quick_sum))||(inst&&bool(inst.include_in_quick_sum));if(!isQuick)return null;let amount=n(base?.amount),basis=base?.value_basis||'latest_snapshot_basis',anchorMonth=anchor;if(acc){if(bool(acc.include_in_liquid_cash)&&liquid[id]){amount=n(liquid[id].amount);basis='calculated_cash';anchorMonth=liquid[id].anchor||anchor;}return{instrument_id:id,amount,value_basis:basis,anchor_month:anchorMonth};}if(inst){const method=key(inst.valuation_method),type=method==='manual_gold_gross_with_financing'?'gross_buyback_value':'market_value';const val=activeValuationOnOrBefore(inst.instrument_id,month,type);let from=anchor;if(val){amount=n(val.amount);basis=key(val.status)==='confirmed'?'confirmed_valuation':'provisional_valuation';from=val.reporting_month==='OPENING'?'OPENING':val.reporting_month;}const actualAfter=(S.data?.transactions||[]).filter(t=>key(t.transaction_type)==='investment'&&key(t.instrument_id)===id&&t.reporting_month>from&&t.reporting_month<=month).reduce((sum,t)=>sum+n(t.amount),0);if(actualAfter){amount+=actualAfter;basis=basis==='latest_snapshot_basis'?'actual_activity_from_snapshot':`${basis}_plus_actual_activity`;}return{instrument_id:id,amount,value_basis:basis,anchor_month:from};}return null;}).filter(Boolean)}
+function actualQuickSumScopeIds(){
+  const m=maps();
+  const explicit=new Set(['bni_saving','bni_life_goals','bni_deposito','bni_sbn','sbn_existing','sr025','bni_rd','bni_reksa_dana']);
+  Object.values(m.accounts).forEach(a=>{
+    const id=key(a.account_id),name=key(a.display_name);
+    if(explicit.has(id)||(name.includes('bni')&&!name.includes('bsi')))explicit.add(id);
+  });
+  Object.values(m.instruments).forEach(i=>{
+    const id=key(i.instrument_id),name=key(i.display_name);
+    if(explicit.has(id)||name.includes('bni')||name.includes('sbn existing')||name.includes('sr025'))explicit.add(id);
+  });
+  return [...explicit];
+}
+function actualQuickSumRows(month){
+  const m=maps();
+  const snapMonths=closedMonths().filter(x=>x<=month);
+  const anchor=snapMonths.at(-1)||'OPENING';
+  const baseRows=rowsAt(anchor).filter(r=>key(r.instrument_id)!=='__receivables__');
+  const baseBy=Object.fromEntries(baseRows.map(r=>[key(r.instrument_id),r]));
+  const liquid=balancesForMonth(month);
+  return actualQuickSumScopeIds().map(id=>{
+    const acc=m.accounts[id],inst=m.instruments[id],base=baseBy[id];
+    if(!acc&&!inst&&!base)return null;
+    let amount=n(base?.amount),basis=base?.value_basis||'latest_snapshot_basis',anchorMonth=anchor;
+    if(acc){
+      if(bool(acc.include_in_liquid_cash)&&liquid[id]){amount=n(liquid[id].amount);basis='calculated_cash';anchorMonth=liquid[id].anchor||anchor;}
+      return {instrument_id:id,amount,value_basis:basis,anchor_month:anchorMonth};
+    }
+    if(inst){
+      const method=key(inst.valuation_method),type=method==='manual_gold_gross_with_financing'?'gross_buyback_value':'market_value';
+      const val=activeValuationOnOrBefore(inst.instrument_id,month,type);
+      let from=anchor;
+      if(val){
+        amount=n(val.amount);
+        basis=key(val.status)==='confirmed'?'confirmed_valuation':'provisional_valuation';
+        from=val.reporting_month==='OPENING'?'OPENING':val.reporting_month;
+      }
+      const actualAfter=(S.data?.transactions||[]).filter(t=>key(t.transaction_type)==='investment'&&key(t.instrument_id)===id&&t.reporting_month>from&&t.reporting_month<=month).reduce((sum,t)=>sum+n(t.amount),0);
+      if(actualAfter){amount+=actualAfter;basis=basis==='latest_snapshot_basis'?'actual_activity_from_snapshot':`${basis}_plus_actual_activity`;}
+      return {instrument_id:id,amount,value_basis:basis,anchor_month:from};
+    }
+    return null;
+  }).filter(r=>r&&Math.abs(n(r.amount))>0.000001);
+}
 function actualQuickSumTotal(month){return actualQuickSumRows(month).reduce((s,r)=>s+n(r.amount),0)}
 function allocationForRows(rows){const out={};rows.forEach(r=>{const g=groupLabelFor(r.instrument_id);out[g]=(out[g]||0)+n(r.amount)});return out}
 function actualNetFlow(month){const f=monthlyForecast(month);return f.actualNet}
