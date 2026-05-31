@@ -1,6 +1,6 @@
 'use strict';
-/* PortOS OS v13.0.5.6.20 — BNI Quick Sum Scope Correction; public front-end contains no private configuration values. */
-const APP_VERSION='OS v13.0.5.6.20';
+/* PortOS OS v13.0.5.6.21 — BNI Quick Sum Valuation Lookup Fix; public front-end contains no private configuration values. */
+const APP_VERSION='OS v13.0.5.6.21';
 const K={endpoint:'pt13_endpoint',token:'pt13_token',cache:'pt13_cache',pin:'pt13_pin_hash',salt:'pt13_pin_salt',mask:'pt13_values_masked',unlocked:'pt13_unlocked_until',away:'pt13_away_at',theme:'pt13_theme'};
 const SESSION_MS=5*60*1000, AWAY_MS=60*1000;
 const PAGES=[['dashboard','dashboard','Dashboard'],['monthly','monthly','Monthly'],['portfolio','portfolio','Portfolio'],['settings','settings','Settings']];
@@ -219,6 +219,15 @@ function actualQuickSumScopeIds(){
   });
   return [...explicit];
 }
+function periodSortKey(month){return month==='OPENING'?'0000-00':String(month||'')}
+function quickSumValuationOnOrBefore(instrumentId,month,valueType){
+  const periods=[...new Set((S.data?.assetValuations||[])
+    .filter(v=>key(v.instrument_id)===key(instrumentId)&&key(v.value_type)===key(valueType)&&(v.reporting_month==='OPENING'||v.reporting_month<=month))
+    .map(v=>v.reporting_month))]
+    .sort((a,b)=>periodSortKey(a).localeCompare(periodSortKey(b)));
+  const p=periods.at(-1);
+  return p?activeValuation(instrumentId,p,valueType):null;
+}
 function actualQuickSumRows(month){
   const m=maps();
   const snapMonths=closedMonths().filter(x=>x<=month);
@@ -236,14 +245,17 @@ function actualQuickSumRows(month){
     }
     if(inst){
       const method=key(inst.valuation_method),type=method==='manual_gold_gross_with_financing'?'gross_buyback_value':'market_value';
-      const val=activeValuationOnOrBefore(inst.instrument_id,month,type);
+      const val=quickSumValuationOnOrBefore(inst.instrument_id,month,type);
       let from=anchor;
       if(val){
         amount=n(val.amount);
         basis=key(val.status)==='confirmed'?'confirmed_valuation':'provisional_valuation';
         from=val.reporting_month==='OPENING'?'OPENING':val.reporting_month;
       }
-      const actualAfter=(S.data?.transactions||[]).filter(t=>key(t.transaction_type)==='investment'&&key(t.instrument_id)===id&&t.reporting_month>from&&t.reporting_month<=month).reduce((sum,t)=>sum+n(t.amount),0);
+      const actualAfter=(S.data?.transactions||[]).filter(t=>{
+        const rm=String(t.reporting_month||'');
+        return key(t.transaction_type)==='investment'&&key(t.instrument_id)===id&&periodSortKey(rm)>periodSortKey(from)&&periodSortKey(rm)<=periodSortKey(month);
+      }).reduce((sum,t)=>sum+n(t.amount),0);
       if(actualAfter){amount+=actualAfter;basis=basis==='latest_snapshot_basis'?'actual_activity_from_snapshot':`${basis}_plus_actual_activity`;}
       return {instrument_id:id,amount,value_basis:basis,anchor_month:from};
     }
