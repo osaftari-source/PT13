@@ -451,7 +451,7 @@
   .report-investment-kpis{margin-bottom:16px}
 }
 
-/* OS v13.0.5.6.24 — BNI Quick Sum compact detail layout */
+/* OS v13.0.5.6.25 — BNI Quick Sum compact detail layout */
 .quick-sum-card .metric-value{margin-bottom:8px}
 .quick-sum-card>.metric-sub{margin-top:0;margin-bottom:10px;line-height:1.35}
 .quick-sum-detail{margin-top:4px}
@@ -462,5 +462,8 @@
 .quick-sum-list{margin-top:4px;border-top:1px solid var(--line)}
 .quick-sum-list .quick-sum-row{padding:14px 0}
 .quick-sum-list .quick-sum-row.total{border-top:1px solid var(--line);padding-top:16px}
-.quick-sum-list .row-label{font-size:15px}
-.quick-sum-list .row-val{text-align:right}
+.quick-sum-list .row-label{font-size:13px}
+.quick-sum-list .row-val{text-align:right;font-size:13px}
+@media(max-width:719px){
+  .quick-sum-list .row-label,.quick-sum-list .row-val{font-size:12px}
+}
