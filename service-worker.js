@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.6.23 BNI Quick Sum Detail Breakdown */
+/* PortOS Service Worker — OS v13.0.5.6.24 BNI Quick Sum Detail Breakdown */
 const CACHE = 'portos-os-v13-0-5-6-22';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.6.23',
-  './app.js?v=13.0.5.6.23',
-  './manifest.json?v=13.0.5.6.23',
+  './styles.css?v=13.0.5.6.24',
+  './app.js?v=13.0.5.6.24',
+  './manifest.json?v=13.0.5.6.24',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
