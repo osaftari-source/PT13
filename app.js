@@ -1,6 +1,6 @@
 'use strict';
-/* PortOS OS v13.0.5.6.28 — Portfolio Holding-Type Plan Variance View; public front-end contains no private configuration values. */
-const APP_VERSION='OS v13.0.5.6.28';
+/* PortOS OS v13.0.5.6.29 — Portfolio Plan Variance Consistency Fix; public front-end contains no private configuration values. */
+const APP_VERSION='OS v13.0.5.6.29';
 const K={endpoint:'pt13_endpoint',token:'pt13_token',cache:'pt13_cache',pin:'pt13_pin_hash',salt:'pt13_pin_salt',mask:'pt13_values_masked',unlocked:'pt13_unlocked_until',away:'pt13_away_at',theme:'pt13_theme'};
 const SESSION_MS=5*60*1000, AWAY_MS=60*1000;
 const PAGES=[['dashboard','dashboard','Dashboard'],['monthly','monthly','Monthly'],['portfolio','portfolio','Portfolio'],['settings','settings','Settings']];
@@ -70,7 +70,7 @@ function announcePortosUpdate(worker){
 async function registerPortosServiceWorker(){
   if(!('serviceWorker' in navigator)){setUpdateStatus('Update checking is not supported in this browser.',{available:false});return null}
   try{
-    portosRegistration=await navigator.serviceWorker.register('./service-worker.js?v=13.0.5.6.28',{updateViaCache:'none'});
+    portosRegistration=await navigator.serviceWorker.register('./service-worker.js?v=13.0.5.6.29',{updateViaCache:'none'});
     if(portosRegistration.waiting&&navigator.serviceWorker.controller)announcePortosUpdate(portosRegistration.waiting);
     portosRegistration.addEventListener('updatefound',()=>{
       const candidate=portosRegistration.installing;if(!candidate)return;
@@ -152,6 +152,9 @@ function latestClosed(){return closedMonths().at(-1)||'OPENING'}
 function beforeMonth(month){const months=['OPENING',...closedMonths()].filter(m=>m==='OPENING'||m<month);return months.at(-1)||'OPENING'}
 function planRows(month,section){return (S.data?.monthlyPlan||[]).filter(r=>r.reporting_month===month&&(!section||key(r.section)===section)&&bool(r.active)!==false)}
 function planSum(month,section){return planRows(month,section).reduce((s,r)=>s+n(r.planned_amount),0)}
+function planOnlyContributionFor(month,instrumentId){const keys=planKeysForInstrument(instrumentId);return planRows(month,'investments').filter(p=>keys.includes(key(p.category_id))).reduce((s,p)=>s+n(p.planned_amount),0)}
+function baselineAnchorMonth(){const configured=String(settings().forecast_anchor_month||'').trim();if(configured&&rowsAt(configured).length)return configured;const confirmed=closedMonths().filter(m=>rawRowsAt(m).some(r=>key(r.status)==='confirmed_closed'||key(r.status)==='historical_migrated'||String(r.value_basis||'').includes('confirmed')));return confirmed.at(-1)||latestClosed();}
+function baselineForecastValue(month){const anchor=baselineAnchorMonth();if(month<=anchor)return snapshotTotal(month);let total=snapshotTotal(anchor);periodsAfterTo(anchor,month).forEach(m=>{total+=planSum(m,'income')-planSum(m,'expenses')});return total;}
 function transactions(month=S.month){return (S.data?.transactions||[]).filter(t=>t.reporting_month===month)}
 function displayCat(id){return maps().categories[key(id)]?.display_name||id||'—'}
 function displayInst(id){return maps().instruments[key(id)]?.display_name||id||'—'}
@@ -404,22 +407,22 @@ function dashboardAlerts(month=S.month){const out=[];const req=Object.values(map
 
 function portfolioRowsForSelectedMonth(month){const current=currentAnalysisMonth();return month>current?projectedHoldingRows(month):estimateHoldingRows(month)}
 function baselineHoldingRows(month){
-  const latest=latestClosed();
-  let rows=(month<=latest?rowsAt(month):rowsAt(latest)).filter(r=>key(r.instrument_id)!=='__receivables__').map(r=>({...r,amount:n(r.amount),value_basis:r.value_basis||'baseline_plan'}));
-  if(month>latest){
+  const anchor=baselineAnchorMonth();
+  let rows=(month<=anchor?rowsAt(month):rowsAt(anchor)).filter(r=>key(r.instrument_id)!=='__receivables__').map(r=>({...r,amount:n(r.amount),value_basis:'baseline_plan'}));
+  if(month>anchor){
     const mm=maps();
-    const periods=periodsAfterTo(latest,month);
+    const periods=periodsAfterTo(anchor,month);
     rows.forEach(r=>{
-      const inst=mm.instruments[key(r.instrument_id)], acc=mm.accounts[key(r.instrument_id)];
+      const inst=mm.instruments[key(r.instrument_id)];
       if(inst){
         const method=key(inst.valuation_method);
-        if(method==='transaction_balance')periods.forEach(m=>{r.amount+=planRows(m,'investments').filter(p=>planKeysForInstrument(inst.instrument_id).includes(key(p.category_id))).reduce((s,p)=>s+n(p.planned_amount),0)+plannedReallocationFor(m,inst.instrument_id)});
+        if(method==='transaction_balance')periods.forEach(m=>{r.amount+=planOnlyContributionFor(m,inst.instrument_id)+plannedReallocationFor(m,inst.instrument_id)});
         else if(method==='fixed_principal_with_payout'||method==='manual_market_value')periods.forEach(m=>{r.amount+=plannedReallocationFor(m,inst.instrument_id)});
-        else if(method==='manual_market_value_confirmable')periods.forEach(m=>{r.amount+=planRows(m,'investments').filter(p=>planKeysForInstrument(inst.instrument_id).includes(key(p.category_id))).reduce((s,p)=>s+n(p.planned_amount),0)+plannedReallocationFor(m,inst.instrument_id)+plannedValuationReturnFor(m)});
+        else if(method==='manual_market_value_confirmable')periods.forEach(m=>{r.amount+=planOnlyContributionFor(m,inst.instrument_id)+plannedReallocationFor(m,inst.instrument_id)+plannedValuationReturnFor(m)});
       }
       r.value_basis='baseline_plan';
     });
-    const target=forecastValue(month,'baseline');
+    const target=baselineForecastValue(month);
     const total=rows.reduce((sum,r)=>sum+n(r.amount),0);
     const delta=target-total;
     if(Math.abs(delta)>0.5){
@@ -427,9 +430,9 @@ function baselineHoldingRows(month){
       if(cash)cash.amount+=delta;else rows.push({instrument_id:'__forecast_adjustment__',amount:delta,value_basis:'baseline_plan_adjustment'});
     }
   }
-  const recTotal=outstandingReceivables(month).reduce((sum,r)=>sum+n(r.outstanding),0);if(recTotal>0)rows.push({instrument_id:'__receivables__',amount:recTotal,value_basis:'outstanding_receivable'});
   return rows;
 }
+function rowsTotal(rows){return rows.reduce((sum,r)=>sum+n(r.amount),0)}
 function rowsByInstrument(rows){return Object.fromEntries(rows.map(r=>[key(r.instrument_id),r]))}
 function portfolioGroupSummaries(currentRows,planRowsList){
   const groups={};
@@ -440,11 +443,11 @@ function portfolioGroupSummaries(currentRows,planRowsList){
   return Object.entries(groups).filter(([g,o])=>Math.abs(o.current)>0.5||Math.abs(o.plan)>0.5).sort((a,b)=>(order.indexOf(a[0])<0?99:order.indexOf(a[0]))-(order.indexOf(b[0])<0?99:order.indexOf(b[0]))||b[1].current-a[1].current);
 }
 function portfolioBasisDescription(month){const status=selectedMonthStatus(month),basis=monthValueBasisLabel(month);if(status==='future')return 'Future forecast plan based on planned contributions, carried-forward values and forecast assumptions.';if(status==='current')return 'Updated Forecast combining recorded activity, latest values and selected-month plan assumptions.';if(snapshotStatus(month)==='provisional_closed')return 'Provisional month-end position pending final statement confirmation.';if(snapshotStatus(month)==='confirmed_closed')return 'Confirmed closed month-end position.';return `${basis}.`}
-function planBasisLabel(month){return month>latestClosed()?`${monthLabel(month)} baseline plan`:monthValueBasisLabel(month)}
+function planBasisLabel(month){return `${monthLabel(month)} baseline plan`}
 function portfolioGroupCard(g,data,planMap){const variance=data.current-data.plan,pctv=data.plan?variance/data.plan*100:0;const ids=[...new Set([...data.currentRows.map(r=>key(r.instrument_id)),...data.planRows.map(r=>key(r.instrument_id))])];const detail=ids.map(id=>portfolioHoldingDetail(data.currentRows.find(r=>key(r.instrument_id)===id),planMap[id],id)).join('');return `<details class="portfolio-holding-group card" ${g==='Liquid Cash'||g==='Market / Valuation Assets'?'open':''}><summary><div><div class="group-title">${esc(g)}</div><div class="group-sub">${compact(data.current)} · Plan ${compact(data.plan)}</div></div><div class="group-summary-right"><strong class="${variance>=0?'pos':'neg'}">${compact(variance)}</strong><span>${data.plan?`${pct(variance/data.plan*100)} vs plan`:'No baseline plan'}</span></div></summary><div class="portfolio-holding-detail">${detail}</div></details>`}
 function portfolioHoldingDetail(row,planRow,id){const source=row||planRow||{instrument_id:id,amount:0,value_basis:'baseline_plan'},plan=planRow?n(planRow.amount):0,current=row?n(row.amount):0,variance=current-plan;return holdingVarianceHtml({...source,amount:current},plan,variance)}
 function holdingVarianceHtml(r,plan,variance){if(key(r.instrument_id)==='__receivables__')return `<div class="holding portfolio-variance-holding"><div class="holding-main"><div><div class="holding-name">Receivables</div><div class="holding-status">Outstanding receivables</div></div><div class="amount-right"><strong>${compact(r.amount)}</strong><div class="holding-est">Plan ${compact(plan)} · <span class="${variance>=0?'pos':'neg'}">${compact(variance)}</span></div></div></div></div>`;if(key(r.instrument_id)==='__forecast_adjustment__')return `<div class="holding portfolio-variance-holding"><div class="holding-main"><div><div class="holding-name">Forecast Cash Adjustment</div><div class="holding-status">Updated forecast reconciliation</div></div><div class="amount-right"><strong>${compact(r.amount)}</strong><div class="holding-est">Plan ${compact(plan)} · <span class="${variance>=0?'pos':'neg'}">${compact(variance)}</span></div></div></div></div>`;const inst=maps().instruments[key(r.instrument_id)],acc=maps().accounts[key(r.instrument_id)],name=inst?.display_name||acc?.display_name||r.instrument_id,method=key(inst?.valuation_method);let status=r.value_basis?.replace(/_/g,' ')||'',acts='';if(inst&&bool(inst.allow_update_value)){if(method==='manual_gold_gross_with_financing')acts=`<button class="small-btn" data-value="${esc(inst.instrument_id)}" data-action="gross">Update Buyback Value</button><button class="small-btn" data-value="${esc(inst.instrument_id)}" data-action="financing">Update Statement Balance</button>`;else acts=`<button class="small-btn" data-value="${esc(inst.instrument_id)}" data-action="value">Update Value</button>${bool(inst.allow_statement_confirmation)?`<button class="small-btn" data-value="${esc(inst.instrument_id)}" data-action="confirm">Confirm Statement</button>`:''}`;}return `<div class="holding portfolio-variance-holding"><div class="holding-main"><div><div class="holding-name">${esc(name)}</div><div class="holding-status">${esc(status)}</div></div><div class="amount-right"><strong>${compact(r.amount)}</strong><div class="holding-est">Plan ${compact(plan)} · <span class="${variance>=0?'pos':'neg'}">${compact(variance)}</span></div></div></div>${acts?`<div class="inline-actions">${acts}</div>`:''}</div>`}
-function renderPortfolio(){const currentRows=portfolioRowsForSelectedMonth(S.month),planRowsList=baselineHoldingRows(S.month),planMap=rowsByInstrument(planRowsList),groups=portfolioGroupSummaries(currentRows,planRowsList),prev=S.month>latestClosed()?beforePlannedMonth(S.month):beforeMonth(S.month),selectedTotal=displayTotalForMonth(S.month),baselineTotal=forecastValue(S.month,'baseline'),variance=selectedTotal-baselineTotal,variancePct=baselineTotal?variance/baselineTotal*100:0,prevTotal=prev?displayTotalForMonth(prev):0,mom=selectedTotal-prevTotal,momPct=prevTotal?mom/prevTotal*100:0,selectedBasis=monthValueBasisLabel(S.month),prevBasis=monthValueBasisLabel(prev);
+function renderPortfolio(){const currentRows=portfolioRowsForSelectedMonth(S.month),planRowsList=baselineHoldingRows(S.month),planMap=rowsByInstrument(planRowsList),groups=portfolioGroupSummaries(currentRows,planRowsList),prev=S.month>latestClosed()?beforePlannedMonth(S.month):beforeMonth(S.month),selectedTotal=rowsTotal(currentRows),baselineTotal=rowsTotal(planRowsList),variance=selectedTotal-baselineTotal,variancePct=baselineTotal?variance/baselineTotal*100:0,prevRows=prev?portfolioRowsForSelectedMonth(prev):[],prevTotal=prev?rowsTotal(prevRows):0,mom=selectedTotal-prevTotal,momPct=prevTotal?mom/prevTotal*100:0,selectedBasis=monthValueBasisLabel(S.month),prevBasis=monthValueBasisLabel(prev);
 $('page').innerHTML=`<div class="page-header page-context"><div><p>Selected-month portfolio position and plan variance</p></div></div><div class="basis-card card"><div><div class="basis-title">${esc(monthLabel(S.month))} · ${esc(selectedBasis.replace(monthLabel(S.month),'').replace(/^\s+/,'')||selectedBasis)}</div><div class="basis-text">${esc(portfolioBasisDescription(S.month))}</div></div></div><div class="grid grid-3 mobile-kpi-grid">${metric('Selected Month Value',compact(selectedTotal),selectedBasis)}${metric('Variance vs Plan',compact(variance),`<strong class="${variance>=0?'pos':'neg'}">${pct(variancePct)}</strong> · vs ${planBasisLabel(S.month)}`,variance>=0?'pos':'neg')}${metric('MoM Movement',compact(mom),`<strong class="${mom>=0?'pos':'neg'}">${pct(momPct)}</strong> · vs ${prevBasis}`,mom>=0?'pos':'neg')}</div><div class="section-title">Portfolio Summary by Holding Type <span>Current basis · plan · variance</span></div><div class="portfolio-group-list">${groups.map(([g,data])=>portfolioGroupCard(g,data,planMap)).join('')}</div><div class="section-title">Month-End Snapshot Readiness</div><div class="card portfolio-readiness-card">${snapshotReadinessHtml(S.month)}</div>`;bindMonthNav();if(q('#snapshotBtn'))q('#snapshotBtn').onclick=()=>saveSnapshot(S.month);qa('[data-value]').forEach(b=>b.onclick=()=>openValuation(b.dataset.value,b.dataset.action));qa('[data-settle]').forEach(b=>b.onclick=()=>openSettlement(b.dataset.settle))}
 function beforePlannedMonth(month){const arr=allMonths().filter(m=>m<month);return arr.at(-1)||latestClosed()}
 function holdingHtml(r,nextMonth){if(r.instrument_id==='__receivables__')return `<div class="holding"><div class="holding-main"><div class="holding-name">Receivables</div><div class="holding-value">${compact(r.amount)}</div></div></div>`;if(r.instrument_id==='__forecast_adjustment__')return `<div class="holding"><div class="holding-main"><div><div class="holding-name">Forecast Cash Adjustment</div><div class="holding-status">Updated forecast reconciliation</div></div><div class="holding-value">${compact(r.amount)}</div></div></div>`;const inst=maps().instruments[key(r.instrument_id)],acc=maps().accounts[key(r.instrument_id)],name=inst?.display_name||acc?.display_name||r.instrument_id,method=key(inst?.valuation_method);let status=r.value_basis?.replace(/_/g,' ')||'',acts='';if(inst&&bool(inst.allow_update_value)){if(method==='manual_gold_gross_with_financing')acts=`<button class="small-btn" data-value="${esc(inst.instrument_id)}" data-action="gross">Update Buyback Value</button><button class="small-btn" data-value="${esc(inst.instrument_id)}" data-action="financing">Update Statement Balance</button>`;else acts=`<button class="small-btn" data-value="${esc(inst.instrument_id)}" data-action="value">Update Value</button>${bool(inst.allow_statement_confirmation)?`<button class="small-btn" data-value="${esc(inst.instrument_id)}" data-action="confirm">Confirm Statement</button>`:''}`;}const nextRow=nextMonth?projectedHoldingRows(nextMonth).find(x=>key(x.instrument_id)===key(r.instrument_id)):null;return `<div class="holding"><div class="holding-main"><div><div class="holding-name">${esc(name)}</div><div class="holding-status">${esc(status)}</div></div><div><div class="holding-value">${compact(r.amount)}</div>${nextRow?`<div class="holding-est">${monthLabel(nextMonth)} est. ${compact(nextRow.amount)}</div>`:''}</div></div>${acts?`<div class="inline-actions">${acts}</div>`:''}</div>`}
