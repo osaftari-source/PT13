@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.6.25 BNI Quick Sum Detail Font Alignment */
-const CACHE = 'portos-os-v13-0-5-6-25';
+/* PortOS Service Worker — OS v13.0.5.6.26 BNI Quick Sum Detail Spacing & Toggle Size */
+const CACHE = 'portos-os-v13-0-5-6-26';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.6.25',
-  './app.js?v=13.0.5.6.25',
-  './manifest.json?v=13.0.5.6.25',
+  './styles.css?v=13.0.5.6.26',
+  './app.js?v=13.0.5.6.26',
+  './manifest.json?v=13.0.5.6.26',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
