@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.6.27 Dashboard Actual Allocation Basis */
-const CACHE = 'portos-os-v13-0-5-6-27';
+/* PortOS Service Worker — OS v13.0.5.6.28 Portfolio Holding-Type Plan Variance View */
+const CACHE = 'portos-os-v13-0-5-6-28';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.6.27',
-  './app.js?v=13.0.5.6.27',
-  './manifest.json?v=13.0.5.6.27',
+  './styles.css?v=13.0.5.6.28',
+  './app.js?v=13.0.5.6.28',
+  './manifest.json?v=13.0.5.6.28',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
