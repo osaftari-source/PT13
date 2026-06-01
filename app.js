@@ -1,6 +1,6 @@
 'use strict';
-/* PortOS OS v13.0.5.6.22 — BNI Quick Sum Detail Breakdown; public front-end contains no private configuration values. */
-const APP_VERSION='OS v13.0.5.6.22';
+/* PortOS OS v13.0.5.6.23 — BNI Quick Sum Detail Breakdown; public front-end contains no private configuration values. */
+const APP_VERSION='OS v13.0.5.6.23';
 const K={endpoint:'pt13_endpoint',token:'pt13_token',cache:'pt13_cache',pin:'pt13_pin_hash',salt:'pt13_pin_salt',mask:'pt13_values_masked',unlocked:'pt13_unlocked_until',away:'pt13_away_at',theme:'pt13_theme'};
 const SESSION_MS=5*60*1000, AWAY_MS=60*1000;
 const PAGES=[['dashboard','dashboard','Dashboard'],['monthly','monthly','Monthly'],['portfolio','portfolio','Portfolio'],['settings','settings','Settings']];
@@ -284,7 +284,11 @@ function quickSumDetailRows(month){
 }
 function renderQuickSumDetail(month,total){
   const rows=quickSumDetailRows(month);
-  return `<details class="quick-sum-detail"><summary>Show calculation</summary><div class="mini-table">${rows.map(r=>`<div class="mini-row"><span>${esc(r.label)}</span><strong>${money(r.amount)} <em>${S.masked?'••':(total?n(r.amount)/total*100:0).toFixed(1)+'%'}</em></strong></div>`).join('')}<div class="mini-row total"><span>Total</span><strong>${money(total)} <em>${S.masked?'••':'100.0%'}</em></strong></div></div><div class="metric-sub">Included: BNI-linked actual/provisional holdings. Excluded: planned contributions and non-BNI assets.</div></details>`;
+  const rowHtml=rows.map(r=>{
+    const share=S.masked?'••':(total?n(r.amount)/total*100:0).toFixed(1)+'%';
+    return `<div class="row quick-sum-row"><div class="row-label">${esc(r.label)}</div><div class="row-val">${money(r.amount)}<div class="row-sub">${share}</div></div></div>`;
+  }).join('');
+  return `<details class="quick-sum-detail"><summary>Show calculation</summary><div class="quick-sum-list">${rowHtml}<div class="row quick-sum-row total"><div class="row-label">Total</div><div class="row-val">${money(total)}<div class="row-sub">${S.masked?'••':'100.0%'}</div></div></div></div><div class="metric-sub">Included: BNI-linked actual/provisional holdings. Excluded: planned contributions and non-BNI assets.</div></details>`;
 }
 
 function allocationForRows(rows){const out={};rows.forEach(r=>{const g=groupLabelFor(r.instrument_id);out[g]=(out[g]||0)+n(r.amount)});return out}
