@@ -554,3 +554,69 @@
     font-size:10px;
   }
 }
+
+
+/* OS v13.0.5.6.32 Portfolio forecast chart & holding alignment */
+.portfolio-forecast{margin-bottom:12px;overflow:hidden}
+.portfolio-group-header{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(118px,auto);
+  gap:12px;
+  align-items:start;
+  padding:13px 16px;
+  border-bottom:1px solid var(--line);
+}
+.portfolio-group-header .group-left{min-width:0}
+.portfolio-holding-group>summary{display:none}
+.portfolio-holding-group{
+  padding:0;
+  overflow:hidden;
+}
+.portfolio-holding-detail{
+  border-top:0;
+  background:transparent;
+}
+:root[data-theme="dark"] .portfolio-holding-detail{background:transparent}
+.portfolio-variance-holding{
+  padding:10px 16px;
+  border-top:1px solid var(--line);
+}
+.portfolio-variance-holding:first-child{border-top:0}
+.portfolio-variance-holding .holding-main{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(128px,auto);
+  gap:12px;
+  align-items:start;
+}
+.portfolio-variance-holding .amount-right{
+  min-width:128px;
+  text-align:right;
+}
+.portfolio-variance-holding .holding-status{
+  max-width:none;
+}
+.portfolio-variance-holding .holding-est{
+  white-space:normal;
+}
+.portfolio-variance-holding .inline-actions{
+  margin-top:7px;
+}
+@media(max-width:719px){
+  .portfolio-group-list{gap:10px}
+  .portfolio-group-header{
+    grid-template-columns:minmax(0,1fr) minmax(100px,auto);
+    gap:10px;
+    padding:11px 12px;
+  }
+  .group-summary-right{min-width:100px}
+  .portfolio-variance-holding{
+    padding:9px 12px;
+  }
+  .portfolio-variance-holding .holding-main{
+    grid-template-columns:minmax(0,1fr) minmax(118px,auto);
+    gap:10px;
+  }
+  .portfolio-variance-holding .amount-right{
+    min-width:118px;
+  }
+}
