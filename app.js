@@ -1,6 +1,6 @@
 'use strict';
-/* PortOS OS v13.0.5.6.30 — Portfolio Current-Month Reconciled Forecast Fix; public front-end contains no private configuration values. */
-const APP_VERSION='OS v13.0.5.6.30';
+/* PortOS OS v13.0.5.6.31 — Portfolio Holding Group Layout Refinement; public front-end contains no private configuration values. */
+const APP_VERSION='OS v13.0.5.6.31';
 const K={endpoint:'pt13_endpoint',token:'pt13_token',cache:'pt13_cache',pin:'pt13_pin_hash',salt:'pt13_pin_salt',mask:'pt13_values_masked',unlocked:'pt13_unlocked_until',away:'pt13_away_at',theme:'pt13_theme'};
 const SESSION_MS=5*60*1000, AWAY_MS=60*1000;
 const PAGES=[['dashboard','dashboard','Dashboard'],['monthly','monthly','Monthly'],['portfolio','portfolio','Portfolio'],['settings','settings','Settings']];
