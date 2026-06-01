@@ -1,6 +1,6 @@
 'use strict';
-/* PortOS OS v13.0.5.6.29 — Portfolio Plan Variance Consistency Fix; public front-end contains no private configuration values. */
-const APP_VERSION='OS v13.0.5.6.29';
+/* PortOS OS v13.0.5.6.30 — Portfolio Current-Month Reconciled Forecast Fix; public front-end contains no private configuration values. */
+const APP_VERSION='OS v13.0.5.6.30';
 const K={endpoint:'pt13_endpoint',token:'pt13_token',cache:'pt13_cache',pin:'pt13_pin_hash',salt:'pt13_pin_salt',mask:'pt13_values_masked',unlocked:'pt13_unlocked_until',away:'pt13_away_at',theme:'pt13_theme'};
 const SESSION_MS=5*60*1000, AWAY_MS=60*1000;
 const PAGES=[['dashboard','dashboard','Dashboard'],['monthly','monthly','Monthly'],['portfolio','portfolio','Portfolio'],['settings','settings','Settings']];
@@ -360,7 +360,7 @@ $('page').innerHTML=`<div class="page-header page-context"><div><p>Private portf
 function monthHasEnded(month){return isPastMonth(month)}
 function snapshotStatus(month){const states=rawRowsAt(month).map(r=>key(r.status));return states.includes('confirmed_closed')?'confirmed_closed':states.includes('provisional_closed')?'provisional_closed':''}
 function snapshotBasisLabel(month){if(!month||month==='OPENING')return 'Opening baseline';const status=snapshotStatus(month);if(status==='confirmed_closed')return `${monthLabel(month)} actual`;if(status==='provisional_closed')return `${monthLabel(month)} provisional`;if(rawRowsAt(month).length)return `${monthLabel(month)} snapshot`;if(month>latestClosed())return `${monthLabel(month)} updated forecast`;return `${monthLabel(month)} snapshot`}
-function monthValueBasisLabel(month){if(!month||month==='OPENING')return 'Opening baseline';if(rawRowsAt(month).length)return snapshotBasisLabel(month);return month>latestClosed()?`${monthLabel(month)} updated forecast`:`${monthLabel(month)} snapshot`}
+function monthValueBasisLabel(month){if(!month||month==='OPENING')return 'Opening baseline';if(rawRowsAt(month).length)return snapshotBasisLabel(month);const status=selectedMonthStatus(month);if(status==='future')return `${monthLabel(month)} forecast plan`;if(status==='current')return `${monthLabel(month)} updated forecast`;return month>latestClosed()?`${monthLabel(month)} updated forecast`:`${monthLabel(month)} snapshot`}
 function latestSnapshotBadge(month){const status=snapshotStatus(month);if(status==='confirmed_closed')return {text:'Closed Actual',cls:'ok'};if(status==='provisional_closed')return {text:'Provisional Snapshot',cls:'warn'};return {text:'Current Estimate',cls:'prov'}}
 function snapshotReadinessItems(month){
   const items=[{label:'Month has ended',ok:monthHasEnded(month)}];
@@ -405,7 +405,7 @@ function snapshotReadinessHtml(month){
 
 function dashboardAlerts(month=S.month){const out=[];const req=Object.values(maps().instruments).filter(i=>bool(i.required_for_month_close));if(isCurrentMonth(month)&&!readyToClose(month))out.push({level:'warn',text:`${monthLabel(month)} is still in progress. Required month-end updates are pending.`});req.filter(i=>key(i.valuation_method)==='manual_market_value_confirmable'&&activeValuation(i.instrument_id,month,'market_value')&&key(activeValuation(i.instrument_id,month,'market_value').status)!=='confirmed').forEach(i=>out.push({level:'warn',text:`${i.display_name} valuation is provisional and awaiting statement confirmation.`}));return out}
 
-function portfolioRowsForSelectedMonth(month){const current=currentAnalysisMonth();return month>current?projectedHoldingRows(month):estimateHoldingRows(month)}
+function portfolioRowsForSelectedMonth(month){const status=selectedMonthStatus(month);return status==='current'||status==='future'?projectedHoldingRows(month):estimateHoldingRows(month)}
 function baselineHoldingRows(month){
   const anchor=baselineAnchorMonth();
   let rows=(month<=anchor?rowsAt(month):rowsAt(anchor)).filter(r=>key(r.instrument_id)!=='__receivables__').map(r=>({...r,amount:n(r.amount),value_basis:'baseline_plan'}));

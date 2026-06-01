@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.6.29 Portfolio Plan Variance Consistency Fix */
-const CACHE = 'portos-os-v13-0-5-6-29';
+/* PortOS Service Worker — OS v13.0.5.6.30 Portfolio Current-Month Reconciled Forecast Fix */
+const CACHE = 'portos-os-v13-0-5-6-30';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.6.29',
-  './app.js?v=13.0.5.6.29',
-  './manifest.json?v=13.0.5.6.29',
+  './styles.css?v=13.0.5.6.30',
+  './app.js?v=13.0.5.6.30',
+  './manifest.json?v=13.0.5.6.30',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
