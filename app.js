@@ -1,6 +1,6 @@
 'use strict';
-/* PortOS OS v13.0.5.6.33 — Portfolio Chart Basis Alignment & Detail Indent; public front-end contains no private configuration values. */
-const APP_VERSION='OS v13.0.5.6.33';
+/* PortOS OS v13.0.5.7.0 — Monthly Report Income Quality Analysis; public front-end contains no private configuration values. */
+const APP_VERSION='OS v13.0.5.7.0';
 const K={endpoint:'pt13_endpoint',token:'pt13_token',cache:'pt13_cache',pin:'pt13_pin_hash',salt:'pt13_pin_salt',mask:'pt13_values_masked',unlocked:'pt13_unlocked_until',away:'pt13_away_at',theme:'pt13_theme'};
 const SESSION_MS=5*60*1000, AWAY_MS=60*1000;
 const PAGES=[['dashboard','dashboard','Dashboard'],['monthly','monthly','Monthly'],['portfolio','portfolio','Portfolio'],['settings','settings','Settings']];
@@ -617,10 +617,41 @@ function reportOtherIncomeDrilldown(d){
   const narrative=`Other Income contributed ${reportMoney(total)} during the reporting period${variance!==0?`, creating ${variance>=0?'a positive':'a negative'} variance of ${reportMoney(Math.abs(variance))} versus plan`:''}${top?`. The main driver${grouped.length>1?'s were':' was'} ${top}`:''}. Treat these items as note-based explanations of income variance, not recurring income unless they are expected to repeat.`;
   return `<h3>Other Income Breakdown</h3>${reportTable(['Other Income Detail / Note','Amount','Share'],rows)}<div class="report-insight"><strong>Income Driver Insight</strong><p>${esc(narrative)}</p></div>`;
 }
+
+function reportIncomeQualityData(d){
+  const recurringCategoryIds=new Set(['salary','deposito_return','sbn_existing_coupon','sr025_coupon']);
+  const nonRecurringCategoryIds=new Set(['other_income','sppd']);
+  const tx=transactions(d.month).filter(t=>key(t.transaction_type)==='income'&&!reportIsValuationIncomeCategory(t.category_id));
+  const buckets={recurring:{label:'Recurring Income',amount:0,items:{}},nonRecurring:{label:'Non-Recurring Income',amount:0,items:{}},unclassified:{label:'Unclassified Income',amount:0,items:{}}};
+  tx.forEach(t=>{
+    const id=key(t.category_id),note=key(t.note),amount=n(t.amount);
+    let bucket='unclassified';
+    if(recurringCategoryIds.has(id))bucket='recurring';
+    else if(nonRecurringCategoryIds.has(id)||id.includes('other'))bucket='nonRecurring';
+    else if(/bonus|shu|meugang|thr|allowance|tunjangan|hadiah|refund|reimburse|cashback|uang makan/.test(note))bucket='nonRecurring';
+    const label=bucket==='nonRecurring'&&id==='other_income'&&String(t.note||'').trim()?String(t.note).trim():displayCat(id);
+    const k=key(label)||id;
+    buckets[bucket].amount+=amount;
+    buckets[bucket].items[k]=buckets[bucket].items[k]||{label,amount:0,count:0};
+    buckets[bucket].items[k].amount+=amount;buckets[bucket].items[k].count++;
+  });
+  const total=Object.values(buckets).reduce((s,b)=>s+b.amount,0),regularExpense=d.expense.regularActual||0;
+  const recurringCoverage=regularExpense?buckets.recurring.amount/regularExpense*100:0;
+  return{...buckets,total,regularExpense,recurringCoverage};
+}
+function reportIncomeQualityHtml(d){
+  const qd=reportIncomeQualityData(d);if(!qd.total)return'';
+  const rows=['recurring','nonRecurring','unclassified'].filter(k=>qd[k].amount>0).map(k=>`<tr><td>${esc(qd[k].label)}</td><td class="num">${reportMoney(qd[k].amount)}</td><td class="num">${(qd[k].amount/qd.total*100).toFixed(1)}%</td></tr>`);
+  rows.push(`<tr class="total"><td>Total Income</td><td class="num">${reportMoney(qd.total)}</td><td class="num">100.0%</td></tr>`);
+  const topNon=Object.values(qd.nonRecurring.items).sort((a,b)=>b.amount-a.amount).slice(0,2).map(x=>`${x.label} (${reportMoney(x.amount)})`).join(' and ');
+  const quality=qd.nonRecurring.amount>qd.recurring.amount?'mainly non-recurring':'mainly recurring';
+  const narrative=`Income quality is ${quality}: recurring income represents ${(qd.recurring.amount/qd.total*100).toFixed(1)}% of total income, while non-recurring income represents ${(qd.nonRecurring.amount/qd.total*100).toFixed(1)}%. Recurring income covers ${qd.regularExpense?qd.recurringCoverage.toFixed(1)+'% of regular expenses':'regular expense coverage is not available'}${topNon?`. Main non-recurring driver${Object.keys(qd.nonRecurring.items).length>1?'s':' was'}: ${topNon}`:''}. Do not treat non-recurring income as repeatable monthly capacity unless it is expected to recur.`;
+  return `<h3>Income Quality Analysis</h3><div class="report-chart-card"><div class="report-chart-wrap"><canvas id="incomeQualityChart"></canvas></div></div>${reportTable(['Income Type','Amount','Share'],rows,'report-quality-table')}<div class="report-insight"><strong>Income Quality Insight</strong><p>${esc(narrative)}</p></div>`;
+}
 function reportIncomeHtml(d){
   const rows=d.incomeRows.map(r=>`<tr><td>${esc(r.label)}</td><td class="num">${reportMoney(r.planned)}</td><td class="num">${reportMoney(r.actual)}</td><td class="num ${r.variance>=0?'pos':'neg'}">${reportSigned(r.variance)}</td></tr>`);
   rows.push(`<tr class="total"><td>Total Income</td><td class="num">${reportMoney(d.incomeRows.reduce((s,r)=>s+r.planned,0))}</td><td class="num">${reportMoney(d.actualIncome)}</td><td class="num">${reportSigned(d.actualIncome-d.incomeRows.reduce((s,r)=>s+r.planned,0))}</td></tr>`);
-  return `<section class="report-section"><h2>Income Analysis</h2><p class="report-caption">Planned versus actual genuine income. Internal transfers and investment valuation changes are not classified as income.</p>${reportTable(['Income Category','Planned','Actual','Variance'],rows)}${reportOtherIncomeDrilldown(d)}</section>`;
+  return `<section class="report-section"><h2>Income Analysis</h2><p class="report-caption">Planned versus actual genuine income. Internal transfers and investment valuation changes are not classified as income.</p>${reportTable(['Income Category','Planned','Actual','Variance'],rows)}${reportIncomeQualityHtml(d)}${reportOtherIncomeDrilldown(d)}</section>`;
 }
 function reportExpenseNarrative(e){
   const dominant=e.incidentalItems[0],variance=e.regularBudget-e.regularActual,repeat=e.repeats[0];
@@ -686,7 +717,16 @@ function renderMonthlyReport(){
   const cfg=S.report,d=monthlyReportData(cfg.month),focused=cfg.type==='focused',section=id=>cfg.sections.includes(id);
   const blocks=[section('summary')?reportSummaryHtml(d):'',section('income')?reportIncomeHtml(d):'',section('expense')?reportExpenseHtml(d):'',section('cash')?reportCashHtml(d):'',section('investment')?reportInvestmentHtml(d):'',section('growth')?reportGrowthHtml(d):'',section('receivables')?reportReceivablesHtml(d):'',section('readiness')?reportReadinessHtml(d):''].join('');
   $('page').innerHTML=`<div class="monthly-report"><div class="report-toolbar no-print"><button class="small-btn" id="backToMonthly">← Back to Monthly</button><button class="small-btn primary" id="printReport">Print / Save as PDF</button></div><header class="report-header"><div><div class="report-brand">Port<span>OS</span> · Monthly Financial & Portfolio Report</div><h1>${esc(focused?cfg.title:d.basis.title)}</h1><div class="report-meta"><span>Reporting period: <strong>${esc(monthLabel(cfg.month))}</strong></span><span>Basis: <strong>${esc(d.basis.title)}</strong></span><span>Generated: <strong>${esc(reportGeneratedDate())}</strong></span></div></div><span class="badge ${d.basis.badge}">${esc(focused?'Focused Report':d.basis.type==='final'?'Final':'Read-only')}</span></header><div class="report-banner ${d.basis.badge}"><strong>${esc(d.basis.title)}</strong><span>${esc(d.basis.explanation)}</span></div>${focused?'<div class="report-focus-disclaimer">Focused report: presents selected analysis only and is not a complete monthly financial report.</div>':''}${blocks}<footer class="report-footer">PortOS · Private Monthly Financial Report · Report-basis values shown as labelled above</footer></div>`;
-  $('backToMonthly').onclick=closeMonthlyReport;$('printReport').onclick=()=>window.print();
+  $('backToMonthly').onclick=closeMonthlyReport;$('printReport').onclick=()=>window.print();drawReportCharts(d);
+}
+function drawReportCharts(d){
+  if(!window.Chart)return;
+  const canvas=$('incomeQualityChart');
+  if(canvas){
+    const qd=reportIncomeQualityData(d),labels=[],values=[];
+    [['Recurring Income',qd.recurring.amount],['Non-Recurring Income',qd.nonRecurring.amount],['Unclassified Income',qd.unclassified.amount]].forEach(x=>{if(x[1]>0){labels.push(x[0]);values.push(x[1])}});
+    if(values.length)S.charts.incomeQuality=new Chart(canvas,{type:'doughnut',data:{labels,datasets:[{data:values,backgroundColor:['#1767a6','#d89c32','#7a93a7']}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'bottom',labels:{boxWidth:12,usePointStyle:true}},tooltip:{callbacks:{label:c=>S.masked?`${c.label}: Rp ••••••`:`${c.label}: ${reportMoney(c.raw)} (${(c.raw/qd.total*100).toFixed(1)}%)`}}}}});
+  }
 }
 
 function renderMonthly(){const f=monthlyForecast(S.month),tx=transactions(S.month),exp=expenseComposition(S.month),liquid=balancesForMonth(S.month),futureReport=reportMonthIsFuture(S.month);$('page').innerHTML=`<div class="page-header page-context"><div><p>${isCurrentMonth(S.month)?'In progress · actual activity plus remaining plan':'Monthly reporting view'}</p>${futureReport?'<p class="report-unavailable-note">Monthly reports are available only for the current month and completed months.</p>':''}</div><button class="small-btn primary" id="generateReport" ${futureReport?'disabled aria-disabled="true"':''}>Generate Monthly Report</button></div><div class="section-title">Monthly Summary <span>Actual primary · forecast secondary</span></div><div class="grid grid-4 mobile-kpi-grid">${metric('Income',compact(f.actualIncome),`Forecast: ${compact(f.income)}`,f.actualIncome>=0?'pos':'')}${metric('Expenses',compact(f.actualExpense),`Forecast: ${compact(f.expense)}`,'neg')}${metric('Invested',compact(f.actualInvest),`Forecast: ${compact(f.invest)}`,'blue')}${metric('Net Cash Flow',compact(f.actualNet),`Forecast: ${compact(f.net)}`,f.actualNet>=0?'pos':'neg')}</div><div class="section-title">Cash Reconciliation</div><div class="grid grid-2 mobile-kpi-grid">${Object.entries(liquid).map(([id,v])=>`<div class="card balance-card"><div class="card-head"><div><h3>${esc(displayAcc(id))}</h3><p>${v.confirmed?'Confirmed for selected month':`Calculated from ${monthLabel(v.anchor)}`}</p></div></div><div class="metric-value">${compact(v.amount)}</div><div class="inline-actions"><button class="small-btn primary" data-balance="${esc(id)}">Update Actual Balance</button></div></div>`).join('')}</div><div class="section-title">Expense Control</div>${expenseControlHtml(exp)}<div class="section-title operational-title">Recent Transactions <span>Review · edit · delete</span></div>${recentTransactionsHtml()}<div class="monthly-overview-grid"><div><div class="section-title">Daily & Weekly Spending Rate</div>${spendingRateHtml(exp)}</div><div><div class="section-title">Spending Composition Analysis <span>Percentage of total personal spending</span></div><div class="card composition-card composition-visual-only"><div class="chart-wrap chart-small"><canvas id="spendingChart"></canvas></div></div></div></div><details class="adaptive-details expense-breakdown-panel" open><summary>Expense Breakdown</summary><div class="card collapse-card expense-breakdown-card">${expenseBreakdownHtml(exp)}</div></details><div class="monthly-detail-grid"><details class="adaptive-details" open><summary>Income Breakdown</summary><div class="card collapse-card">${breakdown(tx.filter(t=>key(t.transaction_type)==='income'),'category_id')}</div></details><details class="adaptive-details" open><summary>Investments / Transfers / Reallocation</summary><div class="card collapse-card">${investmentTransferHtml(tx)}</div></details></div>`;bindMonthNav();$('generateReport').onclick=openReportSetup;qa('[data-balance]').forEach(b=>b.onclick=()=>openBalance(b.dataset.balance));bindRecent();configureAdaptiveDetails();drawSpending(exp)}

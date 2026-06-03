@@ -640,3 +640,10 @@
     padding:9px 12px 9px 23px;
   }
 }
+
+/* PortOS OS v13.0.5.7.0 — Monthly Report Income Quality Analysis */
+.report-chart-card{background:var(--soft);border:1px solid var(--line);border-radius:13px;padding:12px;margin:10px 0 12px;break-inside:avoid}
+.report-chart-wrap{height:250px;position:relative}
+:root[data-theme="dark"] .report-chart-card{background:var(--soft);border-color:var(--line)}
+@media(max-width:719px){.report-chart-wrap{height:220px}}
+@media print{.report-chart-card{background:#fff!important;border-color:#dce5ee;break-inside:avoid}.report-chart-wrap{height:190px}}

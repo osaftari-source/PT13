@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.6.33 Portfolio Chart Basis Alignment & Detail Indent */
-const CACHE = 'portos-os-v13-0-5-6-33';
+/* PortOS Service Worker — OS v13.0.5.7.0 Monthly Report Income Quality Analysis */
+const CACHE = 'portos-os-v13-0-5-7-0';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.6.33',
-  './app.js?v=13.0.5.6.33',
-  './manifest.json?v=13.0.5.6.33',
+  './styles.css?v=13.0.5.7.0',
+  './app.js?v=13.0.5.7.0',
+  './manifest.json?v=13.0.5.7.0',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
