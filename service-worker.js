@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.7.4 Monthly Report Bonus Allocation Insight */
-const CACHE = 'portos-os-v13-0-5-7-4';
+/* PortOS Service Worker — OS v13.0.5.7.5 Monthly Report Expense Composition & Driver Clusters */
+const CACHE = 'portos-os-v13-0-5-7-5';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.7.4',
-  './app.js?v=13.0.5.7.4',
-  './manifest.json?v=13.0.5.7.4',
+  './styles.css?v=13.0.5.7.5',
+  './app.js?v=13.0.5.7.5',
+  './manifest.json?v=13.0.5.7.5',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
