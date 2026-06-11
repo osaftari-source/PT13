@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.7.0 Monthly Report Income Quality Analysis */
-const CACHE = 'portos-os-v13-0-5-7-0';
+/* PortOS Service Worker — OS v13.0.5.7.1 Confirmed Valuation Basis Preference Fix */
+const CACHE = 'portos-os-v13-0-5-7-1';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.7.0',
-  './app.js?v=13.0.5.7.0',
-  './manifest.json?v=13.0.5.7.0',
+  './styles.css?v=13.0.5.7.1',
+  './app.js?v=13.0.5.7.1',
+  './manifest.json?v=13.0.5.7.1',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',

@@ -1,6 +1,6 @@
 'use strict';
-/* PortOS OS v13.0.5.7.0 — Monthly Report Income Quality Analysis; public front-end contains no private configuration values. */
-const APP_VERSION='OS v13.0.5.7.0';
+/* PortOS OS v13.0.5.7.1 — Confirmed Valuation Basis Preference Fix; public front-end contains no private configuration values. */
+const APP_VERSION='OS v13.0.5.7.1';
 const K={endpoint:'pt13_endpoint',token:'pt13_token',cache:'pt13_cache',pin:'pt13_pin_hash',salt:'pt13_pin_salt',mask:'pt13_values_masked',unlocked:'pt13_unlocked_until',away:'pt13_away_at',theme:'pt13_theme'};
 const SESSION_MS=5*60*1000, AWAY_MS=60*1000;
 const PAGES=[['dashboard','dashboard','Dashboard'],['monthly','monthly','Monthly'],['portfolio','portfolio','Portfolio'],['settings','settings','Settings']];
@@ -146,7 +146,20 @@ function allMonths(){const a=[...new Set([...(S.data?.monthlyPlan||[]).map(r=>r.
 function setMonth(delta){const arr=allMonths(),i=Math.max(0,arr.indexOf(S.month));S.month=arr[Math.max(0,Math.min(arr.length-1,i+delta))]||S.month;renderTopbar();renderPage()}
 function settings(){return S.data?.settings||{}}
 function rawRowsAt(month){return (S.data?.portfolioSnapshots||[]).filter(r=>r.reporting_month===month)}
-function rowsAt(month){const base=rawRowsAt(month).filter(r=>key(r.instrument_id)!=='__receivables__');if(month!=='OPENING'){const recTotal=outstandingReceivables(month).reduce((s,r)=>s+n(r.outstanding),0);if(recTotal>0)base.push({instrument_id:'__receivables__',amount:recTotal,value_basis:'outstanding_receivable',status:'calculated'});}return base}
+function valuationTypeForInstrument(inst){const method=key(inst?.valuation_method);return method==='manual_gold_gross_with_financing'?'gross_buyback_value':method.includes('market_value')?'market_value':''}
+function preferConfirmedValuationRows(rows,month){
+  if(month==='OPENING')return rows;
+  const mm=maps();
+  return rows.map(r=>{
+    const inst=mm.instruments[key(r.instrument_id)];
+    const type=valuationTypeForInstrument(inst);
+    if(!inst||!type)return r;
+    const confirmed=(S.data?.assetValuations||[]).filter(v=>key(v.instrument_id)===key(inst.instrument_id)&&v.reporting_month===month&&key(v.value_type)===type&&key(v.status)==='confirmed').at(-1);
+    if(!confirmed)return r;
+    return {...r,amount:n(confirmed.amount),value_basis:key(inst.valuation_method)==='manual_gold_gross_with_financing'?'confirmed_buyback_value':'confirmed_valuation',status:'confirmed_statement'};
+  });
+}
+function rowsAt(month){let base=preferConfirmedValuationRows(rawRowsAt(month).filter(r=>key(r.instrument_id)!=='__receivables__'),month);if(month!=='OPENING'){const recTotal=outstandingReceivables(month).reduce((s,r)=>s+n(r.outstanding),0);if(recTotal>0)base.push({instrument_id:'__receivables__',amount:recTotal,value_basis:'outstanding_receivable',status:'calculated'});}return base}
 function snapshotTotal(month){return rowsAt(month).reduce((s,r)=>s+n(r.amount),0)}
 function latestClosed(){return closedMonths().at(-1)||'OPENING'}
 function beforeMonth(month){const months=['OPENING',...closedMonths()].filter(m=>m==='OPENING'||m<month);return months.at(-1)||'OPENING'}
