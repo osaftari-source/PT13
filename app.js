@@ -1,6 +1,6 @@
 'use strict';
-/* PortOS OS v13.0.5.7.2 — Split-Bill Reimbursement Cash Flow Fix; public front-end contains no private configuration values. */
-const APP_VERSION='OS v13.0.5.7.2';
+/* PortOS OS v13.0.5.7.3 — Monthly Report Savings & Investable Surplus KPI; public front-end contains no private configuration values. */
+const APP_VERSION='OS v13.0.5.7.3';
 const K={endpoint:'pt13_endpoint',token:'pt13_token',cache:'pt13_cache',pin:'pt13_pin_hash',salt:'pt13_pin_salt',mask:'pt13_values_masked',unlocked:'pt13_unlocked_until',away:'pt13_away_at',theme:'pt13_theme'};
 const SESSION_MS=5*60*1000, AWAY_MS=60*1000;
 const PAGES=[['dashboard','dashboard','Dashboard'],['monthly','monthly','Monthly'],['portfolio','portfolio','Portfolio'],['settings','settings','Settings']];
@@ -70,7 +70,7 @@ function announcePortosUpdate(worker){
 async function registerPortosServiceWorker(){
   if(!('serviceWorker' in navigator)){setUpdateStatus('Update checking is not supported in this browser.',{available:false});return null}
   try{
-    portosRegistration=await navigator.serviceWorker.register('./service-worker.js?v=13.0.5.7.2',{updateViaCache:'none'});
+    portosRegistration=await navigator.serviceWorker.register('./service-worker.js?v=13.0.5.7.3',{updateViaCache:'none'});
     if(portosRegistration.waiting&&navigator.serviceWorker.controller)announcePortosUpdate(portosRegistration.waiting);
     portosRegistration.addEventListener('updatefound',()=>{
       const candidate=portosRegistration.installing;if(!candidate)return;
@@ -669,10 +669,33 @@ function reportIncomeQualityHtml(d){
   const narrative=`Income quality is ${quality}: recurring income represents ${(qd.recurring.amount/qd.total*100).toFixed(1)}% of total income, while non-recurring income represents ${(qd.nonRecurring.amount/qd.total*100).toFixed(1)}%. Recurring income covers ${qd.regularExpense?qd.recurringCoverage.toFixed(1)+'% of regular expenses':'regular expense coverage is not available'}${topNon?`. Main non-recurring driver${Object.keys(qd.nonRecurring.items).length>1?'s':' was'}: ${topNon}`:''}. Do not treat non-recurring income as repeatable monthly capacity unless it is expected to recur.`;
   return `<h3>Income Quality Analysis</h3><div class="report-chart-card"><div class="report-chart-wrap"><canvas id="incomeQualityChart"></canvas></div></div>${reportTable(['Income Type','Amount','Share'],rows,'report-quality-table')}<div class="report-insight"><strong>Income Quality Insight</strong><p>${esc(narrative)}</p></div>`;
 }
+function reportSavingsSurplusData(d){
+  const qd=reportIncomeQualityData(d);
+  const totalIncome=d.actualIncome||0,totalExpense=d.expense.total||0,regularExpense=d.expense.regularActual||0,investment=d.actualInvestment||0,recurringIncome=qd.recurring.amount||0;
+  const grossSurplus=totalIncome-totalExpense,recurringSurplus=recurringIncome-regularExpense,postInvestmentGap=totalIncome-totalExpense-investment;
+  const totalSavingsRate=totalIncome?grossSurplus/totalIncome*100:0,recurringSavingsRate=recurringIncome?recurringSurplus/recurringIncome*100:0;
+  let status='healthy',statusText='Income covered expenses and investment contribution.';
+  if(postInvestmentGap<0){status='tight';statusText='Investment contribution exceeded monthly surplus and used existing cash.';}
+  else if(recurringSurplus<0){status='tight';statusText='Recurring income did not fully cover regular expenses.';}
+  else if(recurringSavingsRate<10){status='review';statusText='Recurring surplus is positive but thin.';}
+  return{totalIncome,totalExpense,regularExpense,investment,recurringIncome,grossSurplus,recurringSurplus,postInvestmentGap,totalSavingsRate,recurringSavingsRate,status,statusText};
+}
+function reportSavingsSurplusHtml(d){
+  const s=reportSavingsSurplusData(d);
+  const rows=[
+    `<tr><td>Total income</td><td class="num">${reportMoney(s.totalIncome)}</td></tr>`,
+    `<tr><td>Total expenses</td><td class="num neg">${reportMoney(s.totalExpense)}</td></tr>`,
+    `<tr><td>Investment contribution</td><td class="num">${reportMoney(s.investment)}</td></tr>`,
+    `<tr><td>Recurring income</td><td class="num">${reportMoney(s.recurringIncome)}</td></tr>`,
+    `<tr><td>Regular expenses</td><td class="num neg">${reportMoney(s.regularExpense)}</td></tr>`
+  ];
+  const narrative=`Total savings rate measures headline surplus after all expenses. Recurring savings rate excludes one-off income and compares regular income against regular expenses. ${s.statusText}`;
+  return `<h3>Savings & Investable Surplus</h3><div class="report-mini-grid">${reportKpi('Total Savings Rate',`${s.totalSavingsRate.toFixed(1)}%`,`${reportMoney(s.grossSurplus)} surplus after expenses`,s.grossSurplus>=0?'pos':'neg')}${reportKpi('Recurring Savings Rate',`${s.recurringSavingsRate.toFixed(1)}%`,`${reportMoney(s.recurringSurplus)} recurring surplus`,s.recurringSurplus>=0?'pos':'neg')}${reportKpi('Gross Investable Surplus',reportMoney(s.grossSurplus),'Total income − total expenses',s.grossSurplus>=0?'pos':'neg')}${reportKpi('Post-Investment Cash Gap',reportMoney(s.postInvestmentGap),'Income − expenses − contribution',s.postInvestmentGap>=0?'pos':'neg')}</div>${reportTable(['Savings bridge item','Amount'],rows,'report-quality-table')}<div class="report-insight"><strong>Savings & Surplus Insight</strong><p>${esc(narrative)}</p></div>`;
+}
 function reportIncomeHtml(d){
   const rows=d.incomeRows.map(r=>`<tr><td>${esc(r.label)}</td><td class="num">${reportMoney(r.planned)}</td><td class="num">${reportMoney(r.actual)}</td><td class="num ${r.variance>=0?'pos':'neg'}">${reportSigned(r.variance)}</td></tr>`);
   rows.push(`<tr class="total"><td>Total Income</td><td class="num">${reportMoney(d.incomeRows.reduce((s,r)=>s+r.planned,0))}</td><td class="num">${reportMoney(d.actualIncome)}</td><td class="num">${reportSigned(d.actualIncome-d.incomeRows.reduce((s,r)=>s+r.planned,0))}</td></tr>`);
-  return `<section class="report-section"><h2>Income Analysis</h2><p class="report-caption">Planned versus actual genuine income. Internal transfers and investment valuation changes are not classified as income.</p>${reportTable(['Income Category','Planned','Actual','Variance'],rows)}${reportIncomeQualityHtml(d)}${reportOtherIncomeDrilldown(d)}</section>`;
+  return `<section class="report-section"><h2>Income Analysis</h2><p class="report-caption">Planned versus actual genuine income. Internal transfers and investment valuation changes are not classified as income.</p>${reportTable(['Income Category','Planned','Actual','Variance'],rows)}${reportIncomeQualityHtml(d)}${reportSavingsSurplusHtml(d)}${reportOtherIncomeDrilldown(d)}</section>`;
 }
 function reportExpenseNarrative(e){
   const dominant=e.incidentalItems[0],variance=e.regularBudget-e.regularActual,repeat=e.repeats[0];
