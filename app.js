@@ -1,6 +1,6 @@
 'use strict';
-/* PortOS OS v13.0.5.7.1 — Confirmed Valuation Basis Preference Fix; public front-end contains no private configuration values. */
-const APP_VERSION='OS v13.0.5.7.1';
+/* PortOS OS v13.0.5.7.2 — Split-Bill Reimbursement Cash Flow Fix; public front-end contains no private configuration values. */
+const APP_VERSION='OS v13.0.5.7.2';
 const K={endpoint:'pt13_endpoint',token:'pt13_token',cache:'pt13_cache',pin:'pt13_pin_hash',salt:'pt13_pin_salt',mask:'pt13_values_masked',unlocked:'pt13_unlocked_until',away:'pt13_away_at',theme:'pt13_theme'};
 const SESSION_MS=5*60*1000, AWAY_MS=60*1000;
 const PAGES=[['dashboard','dashboard','Dashboard'],['monthly','monthly','Monthly'],['portfolio','portfolio','Portfolio'],['settings','settings','Settings']];
@@ -70,7 +70,7 @@ function announcePortosUpdate(worker){
 async function registerPortosServiceWorker(){
   if(!('serviceWorker' in navigator)){setUpdateStatus('Update checking is not supported in this browser.',{available:false});return null}
   try{
-    portosRegistration=await navigator.serviceWorker.register('./service-worker.js?v=13.0.5.6.29',{updateViaCache:'none'});
+    portosRegistration=await navigator.serviceWorker.register('./service-worker.js?v=13.0.5.7.2',{updateViaCache:'none'});
     if(portosRegistration.waiting&&navigator.serviceWorker.controller)announcePortosUpdate(portosRegistration.waiting);
     portosRegistration.addEventListener('updatefound',()=>{
       const candidate=portosRegistration.installing;if(!candidate)return;
@@ -174,8 +174,16 @@ function displayInst(id){return maps().instruments[key(id)]?.display_name||id||'
 function displayAcc(id){return maps().accounts[key(id)]?.display_name||id||'—'}
 function actualByType(month,type){return transactions(month).filter(t=>key(t.transaction_type)===type).reduce((s,t)=>s+n(t.amount),0)}
 function personalExpense(t){if(key(t.transaction_type)==='expense')return n(t.amount);if(key(t.transaction_type)==='split_bill')return n(t.my_share);return 0}
-function flowForAccount(t,account){const type=key(t.transaction_type);if(type==='transfer')return key(t.to_account_id)===account?n(t.amount):key(t.from_account_id)===account?-n(t.amount):0;if(key(t.account_id)!==account)return 0;if(type==='income'||type==='receivable_settlement')return n(t.amount);if(type==='expense'||type==='investment'||type==='receivable_out')return -n(t.amount);if(type==='split_bill')return -n(t.amount)+(key(t.reimbursement_status)==='reimbursed'?n(t.reimbursement_amount):0);return 0}
-function balancesForMonth(month){const accounts=Object.values(maps().accounts).filter(a=>bool(a.include_in_liquid_cash));const balRows=S.data?.accountBalances||[];const out={};accounts.forEach(a=>{const id=key(a.account_id);const anchors=balRows.filter(b=>key(b.account_id)===id&&b.reporting_month<=month&&n(b.actual_balance)!==0).sort((x,y)=>String(x.reporting_month).localeCompare(y.reporting_month));const anchor=anchors.at(-1);let total=anchor?n(anchor.actual_balance):0;const after=anchor?.reporting_month||'';(S.data?.transactions||[]).filter(t=>t.reporting_month>after&&t.reporting_month<=month).forEach(t=>total+=flowForAccount(t,id));out[id]={amount:total,anchor:anchor?.reporting_month||'',confirmed:anchor?.reporting_month===month};});return out}
+function flowForAccount(t,account){const type=key(t.transaction_type);if(type==='transfer')return key(t.to_account_id)===account?n(t.amount):key(t.from_account_id)===account?-n(t.amount):0;if(key(t.account_id)!==account)return 0;if(type==='income'||type==='receivable_settlement')return n(t.amount);if(type==='expense'||type==='investment'||type==='receivable_out')return -n(t.amount);if(type==='split_bill')return -n(t.amount);return 0}
+function splitBillReimbursementFlowForAccount(t,account,afterMonth,asOfMonth){
+  if(key(t.transaction_type)!=='split_bill'||key(t.reimbursement_status)!=='reimbursed')return 0;
+  const receivedMonth=String(t.reimbursement_date||t.reporting_month||'').slice(0,7);
+  if(!receivedMonth||receivedMonth<=afterMonth||receivedMonth>asOfMonth)return 0;
+  const receivedAccount=key(t.reimbursement_account_id||t.account_id);
+  if(receivedAccount!==account)return 0;
+  return n(t.reimbursement_amount)||n(t.reimbursable_amount);
+}
+function balancesForMonth(month){const accounts=Object.values(maps().accounts).filter(a=>bool(a.include_in_liquid_cash));const balRows=S.data?.accountBalances||[];const tx=S.data?.transactions||[];const out={};accounts.forEach(a=>{const id=key(a.account_id);const anchors=balRows.filter(b=>key(b.account_id)===id&&b.reporting_month<=month&&n(b.actual_balance)!==0).sort((x,y)=>String(x.reporting_month).localeCompare(y.reporting_month));const anchor=anchors.at(-1);let total=anchor?n(anchor.actual_balance):0;const after=anchor?.reporting_month||'';tx.filter(t=>t.reporting_month>after&&t.reporting_month<=month).forEach(t=>total+=flowForAccount(t,id));tx.forEach(t=>total+=splitBillReimbursementFlowForAccount(t,id,after,month));out[id]={amount:total,anchor:anchor?.reporting_month||'',confirmed:anchor?.reporting_month===month};});return out}
 function outstandingReceivables(asOfMonth){return (S.data?.receivables||[]).map(r=>{const createdMonth=String(r.origination_date||'').slice(0,7);const outTx=(S.data?.transactions||[]).filter(t=>t.receivable_id===r.receivable_id&&key(t.transaction_type)==='receivable_out'&&t.reporting_month<=asOfMonth);if(!outTx.length&&createdMonth&&createdMonth>asOfMonth)return null;const outs=outTx.reduce((s,t)=>s+n(t.amount),0)||(createdMonth&&createdMonth<=asOfMonth?n(r.original_amount):0);if(!outs)return null;const paid=(S.data?.transactions||[]).filter(t=>t.receivable_id===r.receivable_id&&key(t.transaction_type)==='receivable_settlement'&&t.reporting_month<=asOfMonth).reduce((s,t)=>s+n(t.amount),0);const amount=Math.max(0,outs-paid);return{...r,outstanding:amount,status:amount===0?'Settled':amount<outs?'Partially Paid':'Open'}}).filter(r=>r&&r.outstanding>0)}
 function activeValuation(instrumentId,month,valueType){const rows=(S.data?.assetValuations||[]).filter(v=>key(v.instrument_id)===key(instrumentId)&&v.reporting_month===month&&key(v.value_type)===key(valueType));return rows.find(v=>key(v.status)==='confirmed')||rows.find(v=>key(v.status)==='provisional')||rows.at(-1)}
 function planKeysForInstrument(instrumentId){const target=key(instrumentId),mapped=key(maps().instruments[target]?.plan_category_id||target);return [...new Set([target,mapped].filter(Boolean))]}
