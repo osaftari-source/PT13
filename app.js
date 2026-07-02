@@ -1,6 +1,6 @@
 'use strict';
-/* PortOS OS v13.0.5.7.6 — Monthly Report Latest Valuation Preference Fix; public front-end contains no private configuration values. */
-const APP_VERSION='OS v13.0.5.7.6';
+/* PortOS OS v13.0.5.7.7 — Monthly Report Valuation Ending Override Fix; public front-end contains no private configuration values. */
+const APP_VERSION='OS v13.0.5.7.7';
 const K={endpoint:'pt13_endpoint',token:'pt13_token',cache:'pt13_cache',pin:'pt13_pin_hash',salt:'pt13_pin_salt',mask:'pt13_values_masked',unlocked:'pt13_unlocked_until',away:'pt13_away_at',theme:'pt13_theme'};
 const SESSION_MS=5*60*1000, AWAY_MS=60*1000;
 const PAGES=[['dashboard','dashboard','Dashboard'],['monthly','monthly','Monthly'],['portfolio','portfolio','Portfolio'],['settings','settings','Settings']];
@@ -70,7 +70,7 @@ function announcePortosUpdate(worker){
 async function registerPortosServiceWorker(){
   if(!('serviceWorker' in navigator)){setUpdateStatus('Update checking is not supported in this browser.',{available:false});return null}
   try{
-    portosRegistration=await navigator.serviceWorker.register('./service-worker.js?v=13.0.5.7.6',{updateViaCache:'none'});
+    portosRegistration=await navigator.serviceWorker.register('./service-worker.js?v=13.0.5.7.7',{updateViaCache:'none'});
     if(portosRegistration.waiting&&navigator.serviceWorker.controller)announcePortosUpdate(portosRegistration.waiting);
     portosRegistration.addEventListener('updatefound',()=>{
       const candidate=portosRegistration.installing;if(!candidate)return;
@@ -577,12 +577,14 @@ function reportForecastInvestmentReturn(month){
   return{cashIncome,valuation,totalReturn:cashIncome+valuation};
 }
 function reportInvestmentData(month,basis){
-  const prev=beforeMonth(month),openingRows=Object.fromEntries(estimateHoldingRows(prev).map(r=>[key(r.instrument_id),n(r.amount)])),endingRows=Object.fromEntries(estimateHoldingRows(month).map(r=>[key(r.instrument_id),n(r.amount)]));
+  const prev=beforeMonth(month),openingRows=Object.fromEntries(estimateHoldingRows(prev).map(r=>[key(r.instrument_id),n(r.amount)])),baseEndingRows=Object.fromEntries(estimateHoldingRows(month).map(r=>[key(r.instrument_id),n(r.amount)]));
   const cashTx=transactions(month).filter(t=>key(t.transaction_type)==='income'&&bool(maps().categories[key(t.category_id)]?.include_in_investment_earnings));
   const rows=Object.values(maps().instruments).filter(i=>bool(i.active)&&bool(i.include_in_total_portfolio)).map(i=>{
-    const id=key(i.instrument_id),opening=openingRows[id]||0,ending=endingRows[id]||opening,contribution=transactions(month).filter(t=>key(t.transaction_type)==='investment'&&key(t.instrument_id)===id).reduce((s,t)=>s+n(t.amount),0);
+    const id=key(i.instrument_id),method=key(i.valuation_method),valuationBased=['manual_market_value_confirmable','manual_market_value','manual_gold_gross_with_financing'].includes(method),valueType=method==='manual_gold_gross_with_financing'?'gross_buyback_value':'market_value';
+    const opening=openingRows[id]||0,contribution=transactions(month).filter(t=>key(t.transaction_type)==='investment'&&key(t.instrument_id)===id).reduce((s,t)=>s+n(t.amount),0);
+    const sameMonthValuation=valuationBased?activeValuation(i.instrument_id,month,valueType):null;
+    const ending=sameMonthValuation?n(sameMonthValuation.amount):(baseEndingRows[id]||opening);
     const cashIncome=cashTx.filter(t=>key(reportInstrumentForIncomeCategory(t.category_id))===id).reduce((s,t)=>s+n(t.amount),0);
-    const method=key(i.valuation_method),valuationBased=['manual_market_value_confirmable','manual_market_value','manual_gold_gross_with_financing'].includes(method);
     const valuation=valuationBased?ending-opening-contribution:0;
     const result=cashIncome+valuation;
     const basisLabel=method==='manual_gold_gross_with_financing'?'Buyback valuation basis':method.includes('market_value')?'Market valuation basis':method==='fixed_principal_with_payout'?'Cash income / principal basis':'Contribution balance basis';
@@ -590,7 +592,8 @@ function reportInvestmentData(month,basis){
   }).filter(r=>r.opening||r.contribution||r.cashIncome||r.ending||r.valuation);
   const allocated=rows.reduce((s,r)=>s+r.cashIncome,0),cashIncome=cashTx.reduce((s,t)=>s+n(t.amount),0),unallocated=cashIncome-allocated,valuation=rows.reduce((s,r)=>s+r.valuation,0),contribution=rows.reduce((s,r)=>s+r.contribution,0);
   const availableReturn={cashIncome,valuation,totalReturn:cashIncome+valuation};
-  const reportReturn=basis.type==='interim'?reportForecastInvestmentReturn(month):availableReturn;
+  const forecastReturn=reportForecastInvestmentReturn(month);
+  const reportReturn=basis.type==='interim'?{cashIncome:forecastReturn.cashIncome,valuation,totalReturn:forecastReturn.cashIncome+valuation}:availableReturn;
   return{rows,cashIncome,unallocated,valuation,contribution,totalReturn:cashIncome+valuation,availableReturn,reportReturn};
 }
 function reportReceivableData(month){
