@@ -1,6 +1,6 @@
 'use strict';
-/* PortOS OS v13.0.5.7.5 — Monthly Report Expense Composition & Driver Clusters; public front-end contains no private configuration values. */
-const APP_VERSION='OS v13.0.5.7.5';
+/* PortOS OS v13.0.5.7.6 — Monthly Report Latest Valuation Preference Fix; public front-end contains no private configuration values. */
+const APP_VERSION='OS v13.0.5.7.6';
 const K={endpoint:'pt13_endpoint',token:'pt13_token',cache:'pt13_cache',pin:'pt13_pin_hash',salt:'pt13_pin_salt',mask:'pt13_values_masked',unlocked:'pt13_unlocked_until',away:'pt13_away_at',theme:'pt13_theme'};
 const SESSION_MS=5*60*1000, AWAY_MS=60*1000;
 const PAGES=[['dashboard','dashboard','Dashboard'],['monthly','monthly','Monthly'],['portfolio','portfolio','Portfolio'],['settings','settings','Settings']];
@@ -70,7 +70,7 @@ function announcePortosUpdate(worker){
 async function registerPortosServiceWorker(){
   if(!('serviceWorker' in navigator)){setUpdateStatus('Update checking is not supported in this browser.',{available:false});return null}
   try{
-    portosRegistration=await navigator.serviceWorker.register('./service-worker.js?v=13.0.5.7.5',{updateViaCache:'none'});
+    portosRegistration=await navigator.serviceWorker.register('./service-worker.js?v=13.0.5.7.6',{updateViaCache:'none'});
     if(portosRegistration.waiting&&navigator.serviceWorker.controller)announcePortosUpdate(portosRegistration.waiting);
     portosRegistration.addEventListener('updatefound',()=>{
       const candidate=portosRegistration.installing;if(!candidate)return;
@@ -154,7 +154,7 @@ function preferConfirmedValuationRows(rows,month){
     const inst=mm.instruments[key(r.instrument_id)];
     const type=valuationTypeForInstrument(inst);
     if(!inst||!type)return r;
-    const confirmed=(S.data?.assetValuations||[]).filter(v=>key(v.instrument_id)===key(inst.instrument_id)&&v.reporting_month===month&&key(v.value_type)===type&&key(v.status)==='confirmed').at(-1);
+    const confirmed=latestValuationRecord((S.data?.assetValuations||[]).filter(v=>key(v.instrument_id)===key(inst.instrument_id)&&v.reporting_month===month&&key(v.value_type)===type&&key(v.status)==='confirmed'));
     if(!confirmed)return r;
     return {...r,amount:n(confirmed.amount),value_basis:key(inst.valuation_method)==='manual_gold_gross_with_financing'?'confirmed_buyback_value':'confirmed_valuation',status:'confirmed_statement'};
   });
@@ -185,7 +185,9 @@ function splitBillReimbursementFlowForAccount(t,account,afterMonth,asOfMonth){
 }
 function balancesForMonth(month){const accounts=Object.values(maps().accounts).filter(a=>bool(a.include_in_liquid_cash));const balRows=S.data?.accountBalances||[];const tx=S.data?.transactions||[];const out={};accounts.forEach(a=>{const id=key(a.account_id);const anchors=balRows.filter(b=>key(b.account_id)===id&&b.reporting_month<=month&&n(b.actual_balance)!==0).sort((x,y)=>String(x.reporting_month).localeCompare(y.reporting_month));const anchor=anchors.at(-1);let total=anchor?n(anchor.actual_balance):0;const after=anchor?.reporting_month||'';tx.filter(t=>t.reporting_month>after&&t.reporting_month<=month).forEach(t=>total+=flowForAccount(t,id));tx.forEach(t=>total+=splitBillReimbursementFlowForAccount(t,id,after,month));out[id]={amount:total,anchor:anchor?.reporting_month||'',confirmed:anchor?.reporting_month===month};});return out}
 function outstandingReceivables(asOfMonth){return (S.data?.receivables||[]).map(r=>{const createdMonth=String(r.origination_date||'').slice(0,7);const outTx=(S.data?.transactions||[]).filter(t=>t.receivable_id===r.receivable_id&&key(t.transaction_type)==='receivable_out'&&t.reporting_month<=asOfMonth);if(!outTx.length&&createdMonth&&createdMonth>asOfMonth)return null;const outs=outTx.reduce((s,t)=>s+n(t.amount),0)||(createdMonth&&createdMonth<=asOfMonth?n(r.original_amount):0);if(!outs)return null;const paid=(S.data?.transactions||[]).filter(t=>t.receivable_id===r.receivable_id&&key(t.transaction_type)==='receivable_settlement'&&t.reporting_month<=asOfMonth).reduce((s,t)=>s+n(t.amount),0);const amount=Math.max(0,outs-paid);return{...r,outstanding:amount,status:amount===0?'Settled':amount<outs?'Partially Paid':'Open'}}).filter(r=>r&&r.outstanding>0)}
-function activeValuation(instrumentId,month,valueType){const rows=(S.data?.assetValuations||[]).filter(v=>key(v.instrument_id)===key(instrumentId)&&v.reporting_month===month&&key(v.value_type)===key(valueType));return rows.find(v=>key(v.status)==='confirmed')||rows.find(v=>key(v.status)==='provisional')||rows.at(-1)}
+function valuationSortKey(v,index){return `${String(v.statement_received_date||v.value_observed_date||'0000-00-00')}|${String(v.valuation_id||'')}|${String(index).padStart(6,'0')}`}
+function latestValuationRecord(rows){return rows.map((v,i)=>({v,i})).sort((a,b)=>valuationSortKey(a.v,a.i).localeCompare(valuationSortKey(b.v,b.i))).at(-1)?.v}
+function activeValuation(instrumentId,month,valueType){const rows=(S.data?.assetValuations||[]).filter(v=>key(v.instrument_id)===key(instrumentId)&&v.reporting_month===month&&key(v.value_type)===key(valueType));const confirmed=latestValuationRecord(rows.filter(v=>key(v.status)==='confirmed'));if(confirmed)return confirmed;const provisional=latestValuationRecord(rows.filter(v=>key(v.status)==='provisional'));return provisional||latestValuationRecord(rows)}
 function planKeysForInstrument(instrumentId){const target=key(instrumentId),mapped=key(maps().instruments[target]?.plan_category_id||target);return [...new Set([target,mapped].filter(Boolean))]}
 function plannedContributionFor(month,instrumentId){const target=key(instrumentId),keys=planKeysForInstrument(target);const actual=transactions(month).filter(t=>key(t.transaction_type)==='investment'&&key(t.instrument_id)===target).reduce((s,t)=>s+n(t.amount),0);if(actual>0)return actual;return planRows(month,'investments').filter(p=>keys.includes(key(p.category_id))).reduce((s,p)=>s+n(p.planned_amount),0)}
 function plannedReallocationFor(month,instrumentId){const keys=planKeysForInstrument(instrumentId);return planRows(month,'reallocation').filter(p=>keys.includes(key(p.category_id))).reduce((s,p)=>s+n(p.planned_amount),0)}
