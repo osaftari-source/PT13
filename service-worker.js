@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.7.8 Receivable Settlement Save Action Fix */
-const CACHE = 'portos-os-v13-0-5-7-8';
+/* PortOS Service Worker — OS v13.0.5.7.10 Apps Script POST Payload Compatibility Fix */
+const CACHE = 'portos-os-v13-0-5-7-10';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.7.8',
-  './app.js?v=13.0.5.7.8',
-  './manifest.json?v=13.0.5.7.8',
+  './styles.css?v=13.0.5.7.10',
+  './app.js?v=13.0.5.7.10',
+  './manifest.json?v=13.0.5.7.10',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
