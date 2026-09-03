@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.7.11 Mobile Apps Script Sync Fallback Fix */
-const CACHE = 'portos-os-v13-0-5-7-11';
+/* PortOS Service Worker — OS v13.0.5.8.2 Budget Framework Compatibility Layer */
+const CACHE = 'portos-os-v13-0-5-8-2';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.7.11',
-  './app.js?v=13.0.5.7.11',
-  './manifest.json?v=13.0.5.7.11',
+  './styles.css?v=13.0.5.8.2',
+  './app.js?v=13.0.5.8.2',
+  './manifest.json?v=13.0.5.8.2',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
