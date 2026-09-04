@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.8.5.1 Forecast Integrity & Portfolio-Level Plan Fix */
-const CACHE = 'portos-os-v13-0-5-8-5-1';
+/* PortOS Service Worker — OS v13.0.5.8.6 Sinking Draw Forecast Fix */
+const CACHE = 'portos-os-v13-0-5-8-6';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.8.5.1',
-  './app.js?v=13.0.5.8.5.1',
-  './manifest.json?v=13.0.5.8.5.1',
+  './styles.css?v=13.0.5.8.6',
+  './app.js?v=13.0.5.8.6',
+  './manifest.json?v=13.0.5.8.6',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
