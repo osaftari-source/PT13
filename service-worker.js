@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.8.2 Budget Framework Compatibility Layer */
-const CACHE = 'portos-os-v13-0-5-8-2';
+/* PortOS Service Worker — OS v13.0.5.8.3 Cost Centre Budget Dashboard */
+const CACHE = 'portos-os-v13-0-5-8-3';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.8.2',
-  './app.js?v=13.0.5.8.2',
-  './manifest.json?v=13.0.5.8.2',
+  './styles.css?v=13.0.5.8.3',
+  './app.js?v=13.0.5.8.3',
+  './manifest.json?v=13.0.5.8.3',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',

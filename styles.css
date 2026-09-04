@@ -647,3 +647,17 @@
 :root[data-theme="dark"] .report-chart-card{background:var(--soft);border-color:var(--line)}
 @media(max-width:719px){.report-chart-wrap{height:220px}}
 @media print{.report-chart-card{background:#fff!important;border-color:#dce5ee;break-inside:avoid}.report-chart-wrap{height:190px}}
+
+/* PortOS OS v13.0.5.8.3 — Cost Centre Budget Dashboard */
+.cost-centre-grid,.sinking-grid{display:grid;gap:10px}
+.cost-centre-card{padding:0;overflow:hidden}
+.cost-centre-card>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 15px;font-size:14px;font-weight:770;color:var(--ink)}
+.cost-centre-card>summary::-webkit-details-marker{display:none}
+.cost-centre-card>summary:after{content:'▾';color:var(--muted);font-size:12px}
+.cost-centre-card:not([open])>summary:after{content:'▸'}
+.cost-centre-card>.row,.cost-centre-card>.row-sub{margin-left:15px;margin-right:15px}
+.envelope-watch .card-head,.sinking-card .card-head{margin-bottom:10px}
+.report-print-chart{display:none;max-width:100%;height:auto;margin:0 auto}
+@media(min-width:720px){.sinking-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:719px){.cost-centre-card>summary{padding:11px 12px;font-size:13px}.sinking-grid{gap:8px}}
+@media print{.report-chart-wrap canvas{display:none!important}.report-print-chart{display:block!important}.cost-centre-card{break-inside:avoid}}
