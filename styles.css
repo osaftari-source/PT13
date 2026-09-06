@@ -661,3 +661,59 @@
 @media(min-width:720px){.sinking-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:719px){.cost-centre-card>summary{padding:11px 12px;font-size:13px}.sinking-grid{gap:8px}}
 @media print{.report-chart-wrap canvas{display:none!important}.report-print-chart{display:block!important}.cost-centre-card{break-inside:avoid}}
+
+/* PortOS OS v13.0.5.8.7 — Transaction Feed UX */
+.txn-feed-card{padding:0;overflow:hidden}
+.txn-feed-toolbar{display:grid;gap:10px;padding:14px 15px 11px;border-bottom:1px solid var(--line)}
+.txn-search{display:flex;gap:7px;min-width:0}
+.txn-search input{flex:1 1 auto;min-width:0;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-size:12px}
+.txn-search input:focus{outline:2px solid #c4ddf2;border-color:var(--blue)}
+.txn-feed-summary{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11px;color:var(--muted)}
+.txn-feed-summary strong{font-size:12px;color:var(--ink)}
+.txn-feed-summary .small-btn{margin-left:auto}
+.txn-filters{padding:11px 15px;margin:0;border-bottom:1px solid var(--line);background:var(--soft)}
+.txn-filters select{background:var(--card)}
+.txn-feed-list{padding:0 15px}
+.txn-date-group{margin:0 -15px;padding:8px 15px;background:var(--soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:10px;font-weight:780;letter-spacing:.045em;text-transform:uppercase;color:var(--muted)}
+.txn-date-group:first-child{border-top:0}
+.txn-feed-list .txn{padding:11px 0}
+.txn-feed-list .txn-type{display:inline-flex;align-items:center;width:max-content;padding:3px 7px;border-radius:999px;background:var(--soft);font-size:9.5px;letter-spacing:.035em}
+.txn-feed-list .txn-type.pos{background:var(--green-bg)}
+.txn-feed-list .txn-type.neg{background:var(--red-bg)}
+.txn-feed-list .txn-title{margin-top:5px}
+.txn-note{margin-top:4px;font-size:11.5px;color:var(--ink);line-height:1.35;overflow-wrap:anywhere}
+.txn-feed-footer{min-height:46px;margin:0;padding:10px 15px;border-top:1px solid var(--line)}
+@media(min-width:720px){
+  .txn-feed-toolbar{grid-template-columns:minmax(320px,1fr) auto;align-items:center}
+  .txn-feed-summary{justify-content:flex-end}
+  .txn-filters select{flex:1 1 180px}
+}
+@media(max-width:719px){
+  .txn-feed-toolbar{padding:11px 12px 9px}
+  .txn-search{width:100%}
+  .txn-feed-summary{gap:5px}
+  .txn-feed-summary .small-btn{margin-left:0}
+  .txn-filters{padding:9px 12px}
+  .txn-feed-list{padding:0 12px}
+  .txn-date-group{margin:0 -12px;padding:7px 12px}
+  .txn-feed-list .txn{padding:9px 0}
+  .txn-feed-list .txn-side{min-width:128px}
+  .txn-feed-footer{padding:9px 12px}
+}
+
+/* OS v13.0.5.8.7.1 — Transaction Feed hierarchy, cost-centre filter and quick filter */
+.txn-quick-filters{display:flex;gap:7px;flex-wrap:wrap;padding:0 15px 11px;border-bottom:1px solid var(--line)}
+.txn-quick-filter{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:999px;padding:6px 10px;font-size:11px;font-weight:720}
+.txn-quick-filter:hover{color:var(--blue);border-color:color-mix(in srgb,var(--blue) 35%,var(--line))}
+.txn-quick-filter.active{background:color-mix(in srgb,var(--blue) 12%,var(--card));border-color:color-mix(in srgb,var(--blue) 45%,var(--line));color:var(--blue)}
+.txn-classification{display:inline-flex;align-items:center;width:max-content;max-width:100%;margin-top:6px;padding:4px 8px;border-radius:999px;border:1px solid var(--line);background:var(--soft);color:var(--muted);font-size:10.5px;font-weight:720;line-height:1.2;white-space:normal}
+.txn-classification.cc-core{background:color-mix(in srgb,#1767a6 11%,var(--card));border-color:color-mix(in srgb,#1767a6 30%,var(--line));color:color-mix(in srgb,#1767a6 82%,var(--ink))}
+.txn-classification.cc-home_base{background:color-mix(in srgb,#079b93 11%,var(--card));border-color:color-mix(in srgb,#079b93 30%,var(--line));color:color-mix(in srgb,#079b93 82%,var(--ink))}
+.txn-classification.cc-spouse_base{background:color-mix(in srgb,#8b5cf6 11%,var(--card));border-color:color-mix(in srgb,#8b5cf6 30%,var(--line));color:color-mix(in srgb,#8b5cf6 82%,var(--ink))}
+.txn-classification.cc-vehicle{background:color-mix(in srgb,#d97706 11%,var(--card));border-color:color-mix(in srgb,#d97706 30%,var(--line));color:color-mix(in srgb,#d97706 82%,var(--ink))}
+.txn-classification.cc-intercity{background:color-mix(in srgb,#2563eb 11%,var(--card));border-color:color-mix(in srgb,#2563eb 30%,var(--line));color:color-mix(in srgb,#2563eb 82%,var(--ink))}
+.txn-classification.cc-shared{background:color-mix(in srgb,#64748b 11%,var(--card));border-color:color-mix(in srgb,#64748b 30%,var(--line));color:color-mix(in srgb,#64748b 82%,var(--ink))}
+.txn-classification.cc-committed_investment{background:color-mix(in srgb,#0a8962 11%,var(--card));border-color:color-mix(in srgb,#0a8962 30%,var(--line));color:color-mix(in srgb,#0a8962 82%,var(--ink))}
+.txn-classification.cc-discretionary{background:color-mix(in srgb,#bf3144 10%,var(--card));border-color:color-mix(in srgb,#bf3144 28%,var(--line));color:color-mix(in srgb,#bf3144 82%,var(--ink))}
+.txn-classification.cc-work{background:color-mix(in srgb,#0f766e 11%,var(--card));border-color:color-mix(in srgb,#0f766e 30%,var(--line));color:color-mix(in srgb,#0f766e 82%,var(--ink))}
+@media(max-width:719px){.txn-quick-filters{padding:0 12px 9px}.txn-classification{font-size:10px;padding:3px 7px}}
