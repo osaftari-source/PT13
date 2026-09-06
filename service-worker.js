@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.8.8 Reallocation & Redemption Transaction Model */
-const CACHE = 'portos-os-v13-0-5-8-8';
+/* PortOS Service Worker — OS v13.0.5.8.9 Daily Dashboard & UI Simplification */
+const CACHE = 'portos-os-v13-0-5-8-9';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.8.8',
-  './app.js?v=13.0.5.8.8',
-  './manifest.json?v=13.0.5.8.8',
+  './styles.css?v=13.0.5.8.9',
+  './app.js?v=13.0.5.8.9',
+  './manifest.json?v=13.0.5.8.9',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
