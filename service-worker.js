@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.8.7.1 Transaction Feed Hierarchy & Cost Centre Fix */
-const CACHE = 'portos-os-v13-0-5-8-7-1';
+/* PortOS Service Worker — OS v13.0.5.8.8 Reallocation & Redemption Transaction Model */
+const CACHE = 'portos-os-v13-0-5-8-8';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.8.7.1',
-  './app.js?v=13.0.5.8.7.1',
-  './manifest.json?v=13.0.5.8.7.1',
+  './styles.css?v=13.0.5.8.8',
+  './app.js?v=13.0.5.8.8',
+  './manifest.json?v=13.0.5.8.8',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
