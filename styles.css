@@ -779,3 +779,12 @@
   .month-so-far-main{align-items:flex-start}
   .dashboard-feed-head{padding:10px 12px}
 }
+
+/* OS v13.0.5.8.9.2 — mixed-basis institution summary */
+.dashboard-institution-summary-copy{display:flex;flex-direction:column;gap:2px;min-width:0;padding-left:18px}
+.dashboard-institution-row>summary .dashboard-institution-summary-copy{grid-column:1;grid-row:1;padding-left:18px}
+.dashboard-institution-row>summary .dashboard-institution-name{padding-left:0;font-size:13px;font-weight:760}
+.dashboard-institution-summary-copy small,.dashboard-holding-row small{display:block;color:var(--muted);font-size:10.5px;font-weight:520;line-height:1.35}
+.dashboard-holding-row>span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.dashboard-holding-name{font-weight:650}
+@media(max-width:719px){.dashboard-institution-summary-copy small,.dashboard-holding-row small{font-size:10px}.dashboard-institution-summary-copy{gap:1px}}
