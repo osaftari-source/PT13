@@ -723,10 +723,27 @@
 .dashboard-daily{max-width:1120px;margin:0 auto}
 .dashboard-alerts{display:grid;gap:8px;margin-bottom:12px}
 .dashboard-alerts .alert{margin-bottom:0}
-.dashboard-portfolio-line{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;padding:18px 20px}
-.dashboard-portfolio-line .metric-label{margin-bottom:6px}
+.dashboard-portfolio-summary{padding:0;overflow:hidden}
+.dashboard-portfolio-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;padding:18px 20px 16px}
+.dashboard-portfolio-head .metric-label{margin-bottom:6px}
 .dashboard-portfolio-value{font-size:32px;font-weight:800;letter-spacing:-.035em;line-height:1.05}
 .dashboard-portfolio-basis{font-size:12px;color:var(--muted);text-align:right;max-width:240px;line-height:1.4}
+.dashboard-institution-list{border-top:1px solid var(--line)}
+.dashboard-institution-row{border-bottom:1px solid var(--line)}
+.dashboard-institution-row:last-child{border-bottom:0}
+.dashboard-institution-row>summary{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;list-style:none}
+.dashboard-institution-row>summary::-webkit-details-marker{display:none}
+.dashboard-institution-row>summary span{font-size:13px;font-weight:760}
+.dashboard-institution-row>summary strong{font-size:14px;font-weight:800;text-align:right}
+.dashboard-institution-row>summary:before{content:'›';grid-column:1;grid-row:1;width:12px;color:var(--muted);font-size:17px;line-height:1;transform-origin:center;transition:transform .16s ease}
+.dashboard-institution-row>summary span{grid-column:1;grid-row:1;padding-left:18px}
+.dashboard-institution-row>summary strong{grid-column:2;grid-row:1}
+.dashboard-institution-row[open]>summary:before{transform:rotate(90deg)}
+.dashboard-institution-holdings{padding:0 20px 10px 38px}
+.dashboard-holding-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:8px 0;border-top:1px solid color-mix(in srgb,var(--line) 72%,transparent)}
+.dashboard-holding-row span{min-width:0;font-size:12px;color:var(--muted)}
+.dashboard-holding-row strong{font-size:12.5px;text-align:right}
+.dashboard-holding-empty{padding:8px 0 4px;font-size:12px;color:var(--muted)}
 .cash-position-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
 .cash-balance-card{min-height:116px}
 .cash-balance-label{font-size:12px;color:var(--muted);font-weight:700;margin-bottom:9px}
@@ -746,12 +763,14 @@
 .dashboard-feed-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 15px;border-bottom:1px solid var(--line);font-size:12px}
 .dashboard-feed-head span{font-size:11px;color:var(--muted)}
 .field-span-2{grid-column:1/-1}
-@media(min-width:980px){.dashboard-daily>.section-title{margin-top:20px}.dashboard-portfolio-line{margin-top:2px}}
+@media(min-width:980px){.dashboard-daily>.section-title{margin-top:20px}.dashboard-portfolio-summary{margin-top:2px}}
 @media(max-width:719px){
   .dashboard-daily{max-width:none}
-  .dashboard-portfolio-line{align-items:flex-start;padding:14px 13px}
+  .dashboard-portfolio-head{align-items:flex-start;padding:14px 13px 12px}
   .dashboard-portfolio-value{font-size:26px}
   .dashboard-portfolio-basis{font-size:10.5px;max-width:135px}
+  .dashboard-institution-row>summary{padding:11px 13px}
+  .dashboard-institution-holdings{padding:0 13px 9px 31px}
   .cash-position-grid{grid-template-columns:1fr 1fr;gap:8px}
   .cash-balance-card{min-height:101px;padding:11px}
   .cash-balance-label{font-size:10.5px;margin-bottom:6px}

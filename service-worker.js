@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.8.9 Daily Dashboard & UI Simplification */
-const CACHE = 'portos-os-v13-0-5-8-9';
+/* PortOS Service Worker — OS v13.0.5.8.9.1 Dashboard Institution Summary & Monthly Dedup */
+const CACHE = 'portos-os-v13-0-5-8-9-1';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.8.9',
-  './app.js?v=13.0.5.8.9',
-  './manifest.json?v=13.0.5.8.9',
+  './styles.css?v=13.0.5.8.9.1',
+  './app.js?v=13.0.5.8.9.1',
+  './manifest.json?v=13.0.5.8.9.1',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
