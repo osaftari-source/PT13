@@ -788,3 +788,39 @@
 .dashboard-holding-row>span{display:flex;flex-direction:column;gap:2px;min-width:0}
 .dashboard-holding-name{font-weight:650}
 @media(max-width:719px){.dashboard-institution-summary-copy small,.dashboard-holding-row small{font-size:10px}.dashboard-institution-summary-copy{gap:1px}}
+
+/* PortOS OS v13.0.5.8.9.4 — Dashboard YTD & Monthly Cost Centre Layout Fix */
+.dashboard-ytd-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:11px}
+.dashboard-ytd-grid .metric{min-height:104px}
+.dashboard-alert-title{margin-top:22px}
+.dashboard-daily>.dashboard-alerts{margin-bottom:0}
+
+/* Monthly expense breakdown: use the available desktop width instead of
+   placing the single cost-centre grid in one legacy 3-column cell. */
+.expense-breakdown-card{display:block;padding:16px}
+.expense-breakdown-desktop-heading{display:none}
+.expense-breakdown-card .report-note{margin-bottom:12px}
+.cost-centre-card>summary{display:grid;grid-template-columns:minmax(0,1fr) 118px 14px;align-items:center;gap:10px}
+.cost-centre-card>summary>span{grid-column:1;min-width:0}
+.cost-centre-card>summary>strong{grid-column:2;text-align:right;font-variant-numeric:tabular-nums}
+.cost-centre-card>summary:after{grid-column:3;text-align:center}
+.cost-centre-card>.row{display:grid;grid-template-columns:minmax(0,1fr) 118px;align-items:center;gap:12px}
+.cost-centre-card>.row .row-val{min-width:0;text-align:right;font-variant-numeric:tabular-nums}
+.cost-centre-card>.row:last-child{padding-bottom:14px}
+
+@media(min-width:720px){
+  .expense-breakdown-panel{margin-top:20px}
+  .expense-breakdown-card{padding:18px}
+  .expense-breakdown-desktop-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:0 0 12px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+  .expense-breakdown-desktop-heading strong{font-size:14px;color:var(--ink);font-weight:780}
+  .expense-breakdown-desktop-heading span{font-size:11.5px;color:var(--muted)}
+  .expense-breakdown-card .cost-centre-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;width:100%}
+}
+@media(max-width:719px){
+  .dashboard-ytd-grid{gap:8px;margin-top:8px}
+  .dashboard-ytd-grid .metric{min-height:91px}
+  .expense-breakdown-card{padding:12px}
+  .cost-centre-card>summary{grid-template-columns:minmax(0,1fr) 105px 12px;gap:8px}
+  .cost-centre-card>.row{grid-template-columns:minmax(0,1fr) 105px;gap:9px}
+  .cost-centre-card>.row:last-child{padding-bottom:12px}
+}

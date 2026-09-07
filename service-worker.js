@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.8.9.3 Recorded-Basis Institution Summary */
-const CACHE = 'portos-os-v13-0-5-8-9-3';
+/* PortOS Service Worker — OS v13.0.5.8.9.4 Dashboard YTD & Monthly Cost Centre Layout Fix */
+const CACHE = 'portos-os-v13-0-5-8-9-4';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.8.9.3',
-  './app.js?v=13.0.5.8.9.3',
-  './manifest.json?v=13.0.5.8.9.3',
+  './styles.css?v=13.0.5.8.9.4',
+  './app.js?v=13.0.5.8.9.4',
+  './manifest.json?v=13.0.5.8.9.4',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
