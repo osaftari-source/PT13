@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.8.9.4 Dashboard YTD & Monthly Cost Centre Layout Fix */
-const CACHE = 'portos-os-v13-0-5-8-9-4';
+/* PortOS Service Worker — OS v13.0.5.8.9.5 Monthly Recent Transactions Compact Pager */
+const CACHE = 'portos-os-v13-0-5-8-9-5';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.8.9.4',
-  './app.js?v=13.0.5.8.9.4',
-  './manifest.json?v=13.0.5.8.9.4',
+  './styles.css?v=13.0.5.8.9.5',
+  './app.js?v=13.0.5.8.9.5',
+  './manifest.json?v=13.0.5.8.9.5',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',

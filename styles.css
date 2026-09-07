@@ -824,3 +824,6 @@
   .cost-centre-card>.row{grid-template-columns:minmax(0,1fr) 105px;gap:9px}
   .cost-centre-card>.row:last-child{padding-bottom:12px}
 }
+
+/* OS v13.0.5.8.9.5 — Monthly Recent Transactions Compact Pager */
+.txn-feed-footer{flex-wrap:wrap}.txn-page-label{min-width:92px;text-align:center;font-weight:650;color:var(--muted)}.txn-feed-footer .small-btn:disabled{opacity:.45;cursor:default}
