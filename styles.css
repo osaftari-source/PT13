@@ -827,3 +827,34 @@
 
 /* OS v13.0.5.8.9.5 — Monthly Recent Transactions Compact Pager */
 .txn-feed-footer{flex-wrap:wrap}.txn-page-label{min-width:92px;text-align:center;font-weight:650;color:var(--muted)}.txn-feed-footer .small-btn:disabled{opacity:.45;cursor:default}
+
+
+/* PortOS OS v13.0.5.8.9.6 — Portfolio Recorded / Projected Basis UX */
+.portfolio-summary-toolbar{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin:22px 0 10px}
+.portfolio-summary-title{font-size:14px;color:#334459;font-weight:760}
+.portfolio-summary-basis{margin-top:4px;color:var(--muted);font-size:12px;line-height:1.4}
+.portfolio-basis-toggle{display:flex;gap:6px;flex:0 0 auto}
+.portfolio-basis-toggle .small-btn{min-width:82px}
+.portfolio-holding-detail{padding-left:0}
+.portfolio-variance-holding{padding-left:16px;padding-right:16px}
+.portfolio-recorded-subtotal strong{color:var(--ink)}
+.portfolio-stale-badge{margin-left:6px;vertical-align:middle;white-space:nowrap}
+:root[data-theme="dark"] .portfolio-summary-title{color:var(--ink)}
+@media(max-width:719px){
+  .portfolio-summary-toolbar{align-items:stretch;flex-direction:column;margin:18px 0 9px;gap:9px}
+  .portfolio-basis-toggle{width:100%}
+  .portfolio-basis-toggle .small-btn{flex:1}
+  .portfolio-holding-detail{padding-left:0}
+  .portfolio-variance-holding{padding:9px 12px}
+}
+
+
+/* PortOS OS v13.0.5.8.10.1 — Plan Scenario Toggle + Portfolio correction */
+.plan-scenario-block{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--soft)}
+.plan-scenario-label{font-size:12px;font-weight:760;color:#334459}
+.plan-scenario-toggle{display:inline-flex;gap:6px;align-items:center}
+.plan-scenario-help{font-size:11px;color:var(--muted);line-height:1.35;flex:1 1 280px}
+.scenario-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px;padding:11px 13px;border:1px solid #f4d58a;border-radius:12px;background:var(--orange-bg);font-size:12px;line-height:1.4}
+.scenario-banner strong{font-weight:780}
+:root[data-theme="dark"] .plan-scenario-block{background:rgba(255,255,255,.03)}
+@media(max-width:719px){.plan-scenario-block{align-items:flex-start;padding:11px 12px}.plan-scenario-label{width:100%}.plan-scenario-toggle{width:100%}.plan-scenario-toggle .small-btn{flex:1}.scenario-banner{align-items:flex-start;flex-direction:column}.scenario-banner .small-btn{width:100%}}

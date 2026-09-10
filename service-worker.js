@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.8.9.5 Monthly Recent Transactions Compact Pager */
-const CACHE = 'portos-os-v13-0-5-8-9-5';
+/* PortOS Service Worker — OS v13.0.5.8.10.1 Plan Scenario + Portfolio Missing-Instrument Fix */
+const CACHE = 'portos-os-v13-0-5-8-10-1';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.8.9.5',
-  './app.js?v=13.0.5.8.9.5',
-  './manifest.json?v=13.0.5.8.9.5',
+  './styles.css?v=13.0.5.8.10.1',
+  './app.js?v=13.0.5.8.10.1',
+  './manifest.json?v=13.0.5.8.10.1',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
