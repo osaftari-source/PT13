@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.8.10.2 Plan Scenario + Portfolio Missing-Instrument Fix */
-const CACHE = 'portos-os-v13-0-5-8-10-2';
+/* PortOS Service Worker — OS v13.0.5.8.10.3 Wallet Same-Month Live Balance Fix */
+const CACHE = 'portos-os-v13-0-5-8-10-3';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.8.10.2',
-  './app.js?v=13.0.5.8.10.2',
-  './manifest.json?v=13.0.5.8.10.2',
+  './styles.css?v=13.0.5.8.10.3',
+  './app.js?v=13.0.5.8.10.3',
+  './manifest.json?v=13.0.5.8.10.3',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
