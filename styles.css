@@ -858,3 +858,6 @@
 .scenario-banner strong{font-weight:780}
 :root[data-theme="dark"] .plan-scenario-block{background:rgba(255,255,255,.03)}
 @media(max-width:719px){.plan-scenario-block{align-items:flex-start;padding:11px 12px}.plan-scenario-label{width:100%}.plan-scenario-toggle{width:100%}.plan-scenario-toggle .small-btn{flex:1}.scenario-banner{align-items:flex-start;flex-direction:column}.scenario-banner .small-btn{width:100%}}
+
+/* 8.10.2 spend kind and sinking summary */
+.spend-kind-card{margin:16px 0;padding:18px}.spend-kind-scroll{overflow-x:auto}.spend-kind-table{width:100%;border-collapse:collapse;min-width:510px}.spend-kind-table th,.spend-kind-table td{padding:10px 12px;border-bottom:1px solid var(--border,#ddd);text-align:right;font-variant-numeric:tabular-nums}.spend-kind-table th:first-child,.spend-kind-table td:first-child{text-align:left}.spend-kind-note{font-size:12px;opacity:.7;margin-top:10px}.sinking-summary-line{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:20px 0;padding:14px 16px;border:1px solid var(--border,#ddd);border-radius:12px;font-size:13px}
