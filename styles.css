@@ -744,7 +744,7 @@
 .dashboard-holding-row span{min-width:0;font-size:12px;color:var(--muted)}
 .dashboard-holding-row strong{font-size:12.5px;text-align:right}
 .dashboard-holding-empty{padding:8px 0 4px;font-size:12px;color:var(--muted)}
-.cash-position-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.cash-position-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:11px}
 .cash-balance-card{min-height:116px}
 .cash-balance-label{font-size:12px;color:var(--muted);font-weight:700;margin-bottom:9px}
 .cash-balance-status{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:9px;font-size:11px;color:var(--muted)}
@@ -772,6 +772,7 @@
   .dashboard-institution-row>summary{padding:11px 13px}
   .dashboard-institution-holdings{padding:0 13px 9px 31px}
   .cash-position-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .cash-position-grid>.cash-balance-card:last-child:nth-child(odd){grid-column:1/-1}
   .cash-balance-card{min-height:101px;padding:11px}
   .cash-balance-label{font-size:10.5px;margin-bottom:6px}
   .cash-balance-status{font-size:10px;gap:5px;margin-top:7px}
@@ -860,4 +861,4 @@
 @media(max-width:719px){.plan-scenario-block{align-items:flex-start;padding:11px 12px}.plan-scenario-label{width:100%}.plan-scenario-toggle{width:100%}.plan-scenario-toggle .small-btn{flex:1}.scenario-banner{align-items:flex-start;flex-direction:column}.scenario-banner .small-btn{width:100%}}
 
 /* 8.10.2 spend kind and sinking summary */
-.spend-kind-card{margin:16px 0;padding:18px}.spend-kind-scroll{overflow-x:auto}.spend-kind-table{width:100%;border-collapse:collapse;min-width:510px}.spend-kind-table th,.spend-kind-table td{padding:10px 12px;border-bottom:1px solid var(--border,#ddd);text-align:right;font-variant-numeric:tabular-nums}.spend-kind-table th:first-child,.spend-kind-table td:first-child{text-align:left}.spend-kind-note{font-size:12px;opacity:.7;margin-top:10px}.sinking-summary-line{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:20px 0;padding:14px 16px;border:1px solid var(--border,#ddd);border-radius:12px;font-size:13px}
+.spend-kind-card{margin:16px 0;padding:18px}.spend-kind-scroll{overflow-x:auto}.spend-kind-table{width:100%;border-collapse:collapse;min-width:510px;font-size:12px}.spend-kind-table th,.spend-kind-table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}.spend-kind-table th{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--soft);font-weight:760;white-space:nowrap}.spend-kind-table th:first-child,.spend-kind-table td:first-child{text-align:left}.spend-kind-note{font-size:12px;opacity:.7;margin-top:10px}.sinking-summary-line{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:20px 0;padding:14px 16px;border:1px solid var(--line);border-radius:12px;font-size:13px}

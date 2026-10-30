@@ -1,11 +1,11 @@
-/* PortOS Service Worker — OS v13.0.5.8.10.3 Wallet Same-Month Live Balance Fix */
-const CACHE = 'portos-os-v13-0-5-8-10-3';
+/* PortOS Service Worker — OS v13.0.5.8.10.4 Cash Wallet Dashboard Consistency */
+const CACHE = 'portos-os-v13-0-5-8-10-4';
 const CORE = [
   './',
   './index.html',
-  './styles.css?v=13.0.5.8.10.3',
-  './app.js?v=13.0.5.8.10.3',
-  './manifest.json?v=13.0.5.8.10.3',
+  './styles.css?v=13.0.5.8.10.4',
+  './app.js?v=13.0.5.8.10.4',
+  './manifest.json?v=13.0.5.8.10.4',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
